@@ -62,4 +62,4 @@ crates/inspect-web/site.sh OUT BUNDLE_DIR   # build the site into OUT
 This repository is generated from a private development repository, where
 the redraws are made (marked up from the scans, fitted and solved). Only the
 viewer, the document format and its renderer are here, with the built site.
-Generated from development commit 747f512 on 2026-11-01.
+Generated from development commit d294fb7 on 2026-11-01.

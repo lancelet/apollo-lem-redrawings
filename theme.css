@@ -391,7 +391,7 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
   padding: 0 8px; gap: 6px;
   padding-top: env(safe-area-inset-top);
 }
-.shell[data-layout="mobile"] .shell[data-layout="mobile"] .doc-title { display: none; }
+.shell[data-layout="mobile"] .doc-title { display: none; }
 .shell[data-layout="mobile"] .group button { padding: 8px 9px; min-height: 36px; }
 .shell[data-layout="mobile"] #menu { padding: 8px 10px; min-height: 36px; display: inline-flex !important; }
 .shell[data-layout="mobile"] .opacity {
@@ -447,13 +447,10 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
 .menu-actions button { flex: 1; border-color: var(--line); color: var(--text); padding: 10px 12px; }
 .shell[data-layout="mobile"] .modal { width: calc(100vw - 20px); max-height: 88dvh; }
 .shell[data-layout="desktop"] #mode-wipe { display: none; }
-.shell[data-layout="mobile"] .shell[data-layout="mobile"] .bar { letter-spacing: 0.02em; font-size: 12px; }
+.shell[data-layout="mobile"] .bar { letter-spacing: 0.02em; font-size: 12px; }
 .shell[data-layout="mobile"] .spacer { display: none; }
 .shell[data-layout="mobile"] .group { flex: 1; }
 .shell[data-layout="mobile"] .group button { flex: 1; padding: 8px 4px; }
 .sheet-head { flex: none; touch-action: none; cursor: grab; }
 
-/* A phone's bar holds the mode switch and the menu only; the sheet's title
-   is in the page title and the About panel. */
-.shell[data-layout="mobile"] .doc-title { display: none; }
 .doc-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
