@@ -9,17 +9,21 @@
  * `data-theme` on <html> is set by the chrome. Fonts are vendored (SIL Open
  * Font Licence) so the app runs with no network. */
 
+/* Subsets of the fonts (tools/publish/subset-fonts.sh; the originals are in
+ * fonts-src/): a character outside the range falls back to a system font. */
 @font-face {
   font-family: "JetBrains Mono";
-  src: url("fonts/JetBrainsMono[wght].ttf") format("truetype");
+  src: url("fonts/JetBrainsMono-subset.woff2") format("woff2");
   font-weight: 100 800;
   font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-017F, U+0391-03C9, U+2010-2027, U+2030-203A, U+2044, U+20AC, U+2122, U+2190-2199, U+2205, U+2212, U+2215, U+2218, U+221A, U+221E, U+2248, U+2260, U+2264, U+2265, U+2300, U+2318, U+25CF, U+25CB;
 }
 @font-face {
   font-family: "Inter";
-  src: url("fonts/Inter[opsz,wght].ttf") format("truetype");
+  src: url("fonts/Inter-subset.woff2") format("woff2");
   font-weight: 100 900;
   font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-017F, U+0391-03C9, U+2010-2027, U+2030-203A, U+2044, U+20AC, U+2122, U+2190-2199, U+2205, U+2212, U+2215, U+2218, U+221A, U+221E, U+2248, U+2260, U+2264, U+2265, U+2300, U+2318, U+25CF, U+25CB;
 }
 
 :root, :root[data-theme="white"] {
@@ -357,6 +361,8 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
  * the divider (inline clip-path from the shell). */
 .panes.wipe { display: block; }
 .panes.wipe canvas.pane { position: absolute; left: 0; top: 0; border-left: none; }
+/* The redraw comes first in the markup, so it is lifted over the scan. */
+.panes.wipe canvas.pane:first-child { z-index: 1; }
 .wipe-handle {
   position: absolute; top: 0; bottom: 0; z-index: 3;
   width: 44px; margin-left: -22px;
@@ -465,3 +471,30 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
 .shell[data-layout="mobile"] .sheet .grip { height: 16px; }
 .shell[data-layout="mobile"] .sheet .peek { min-height: 32px; padding-bottom: 4px; }
 .shell[data-layout="mobile"] .sheet .close { min-height: 30px; padding-top: 0; padding-bottom: 0; }
+
+/* The page before the viewer is up (index.html): what is being fetched and
+ * how much of it has come, in the theme's tokens. No motion: the bar jumps to
+ * the bytes received, and has no length to show before the size is known. */
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  background: var(--bg);
+  color: var(--text);
+}
+#boot .box { width: min(100%, 360px); text-transform: var(--case); }
+#boot .phase { margin-bottom: 8px; }
+#boot .bar-track { height: 4px; background: var(--line); }
+#boot .bar-fill { height: 100%; width: 0; background: var(--accent); }
+#boot .bytes {
+  margin-top: 6px;
+  min-height: 1.45em;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}

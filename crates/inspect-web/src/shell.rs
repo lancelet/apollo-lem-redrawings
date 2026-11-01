@@ -14,7 +14,9 @@ use lmsheets_gpu::raster::{OwnerLayer, OwnerLit, Pyramid, RasterLayer, ScanView,
 use lmsheets_gpu::{Lit, Renderer, View};
 use lmsheets_inspector::constraints::{cluster, pick_icon, singles, Cluster, ICON_PX};
 use lmsheets_inspector::detail::{self, Detail};
-use lmsheets_inspector::pick::{LIT_MIN_PX, OWNER_ZOOM, SERVING_MIN_PX};
+use lmsheets_inspector::pick::{
+    LIT_MIN_PX, OWNER_ZOOM, REACH_CSS_PX, REACH_TOUCH_CSS_PX, SERVING_MIN_PX,
+};
 use lmsheets_inspector::{
     update, Chain, ConstraintKind, ConstraintTrust, Constraints, Groups, Highlight, Layer, Mode,
     Model, Msg, OwnerTable, OwnerTile, Pane, Picker, PinHead, Role,
@@ -169,6 +171,8 @@ pub struct Shell {
     /// Whether the view is still the fit (a resize then refits).
     fitted: bool,
     dpr: f64,
+    /// Whether the last pointer was a finger: the pick reaches further.
+    coarse: bool,
     /// How the last hover was picked, for the status line.
     pub pick_source: &'static str,
     /// Errors from fetches and decodes, newest last.
@@ -338,6 +342,7 @@ impl Shell {
             mobile,
             fitted: true,
             dpr,
+            coarse: false,
             pick_source: "",
             errors: Vec::new(),
         };
@@ -352,6 +357,11 @@ impl Shell {
         } else {
             MAX_IN_FLIGHT
         }
+    }
+
+    /// Say whether the pointer is a finger (a mouse's moves say not).
+    pub fn set_coarse(&mut self, coarse: bool) {
+        self.coarse = coarse;
     }
 
     /// The device pixel ratio.
@@ -442,7 +452,14 @@ impl Shell {
                 self.expanded = None;
             }
         }
-        let node = self.picker.pick(&self.model, pane, at);
+        let reach = if self.coarse {
+            REACH_TOUCH_CSS_PX
+        } else {
+            REACH_CSS_PX
+        };
+        let node = self
+            .picker
+            .pick_within(&self.model, pane, at, reach * self.dpr);
         self.pick_source = match (pane, self.model.scan_camera()) {
             (Pane::Scan, Some(c))
                 if c.zoom >= OWNER_ZOOM
@@ -829,6 +846,7 @@ impl Shell {
     /// the pin over empty paper), as a click does; `piece` takes the single
     /// piece (a long press). The touch leaves no hover behind, only the pin.
     pub fn touch(&mut self, pane: Pane, at: (f64, f64), piece: bool) {
+        self.coarse = true;
         let alt = self.alt;
         self.set_alt(piece);
         self.click(pane, at);

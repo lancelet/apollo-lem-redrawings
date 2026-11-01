@@ -501,6 +501,13 @@ fn the_two_panes_pick_the_same_node_and_the_owner_map_decides_when_held() {
     let mid = (size.0 as f64 / 2.0, size.1 as f64 / 2.0);
     assert_eq!(picker.pick(&m, Pane::Redraw, mid), Some(NodeId(1)));
     assert_eq!(picker.pick(&m, Pane::Redraw, (mid.0, mid.1 + 40.0)), None);
+    // A wider reach takes the line from further off: the viewer's.
+    let off = (mid.0, mid.1 + 40.0);
+    assert_eq!(picker.pick_within(&m, Pane::Redraw, off, 30.0), None);
+    assert_eq!(
+        picker.pick_within(&m, Pane::Redraw, off, 50.0),
+        Some(NodeId(1))
+    );
     // The scan pane's pixel for the same paper point.
     let scan_px = |m: &Model| {
         let cam = m.scan_camera().unwrap();
@@ -541,6 +548,13 @@ fn the_two_panes_pick_the_same_node_and_the_owner_map_decides_when_held() {
     );
     assert_eq!(picker.pick(&m, Pane::Scan, px), Some(NodeId(7)));
     assert_eq!(picker.pick(&m, Pane::Scan, (px.0, px.1 + 200.0)), None);
+    // Zoomed in, the owner search reaches as far as it is asked to.
+    let near = (px.0, px.1 + 12.0);
+    assert_eq!(picker.pick_within(&m, Pane::Scan, near, 4.0), None);
+    assert_eq!(
+        picker.pick_within(&m, Pane::Scan, near, 20.0),
+        Some(NodeId(7))
+    );
 }
 
 /// The hover is visible at every zoom, down to the whole sheet (the chunk 20

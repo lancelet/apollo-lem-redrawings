@@ -13,12 +13,69 @@
     location.replace("fallback.html?reason=" + encodeURIComponent("WebGPU is not available in this browser."));
   }
 </script>
-<link rel="stylesheet" href="./theme.css" integrity="sha384&#x2D;nJIF85B3vRLhfxzQ3fdIROTrqCXj7eXzj6W&#x2F;bhOQVDzNj5SPa&#x2B;QmcxSwBg2vpBTi"/>
+<script>
+  // The indicator in <body> (#boot): the viewer's download with its bytes, then
+  // the sheet's loading; the viewer removes it when the first frame is drawn.
+  // The .wasm is the bulk of a first visit, so its response body is counted as
+  // it streams. Its length is the Content-Length when the body comes as it is;
+  // a compressed body's is the compressed length, so then site.sh's WASM_BYTES
+  // (the file's size) stands in, or only the bytes received are shown.
+  (function () {
+    var WASM_BYTES = 2569637; // the wasm file's size, set by site.sh
+    var el = function (id) { return document.getElementById(id); };
+    var show = function (phase, got, total) {
+      var phaseEl = el("boot-phase");
+      if (!phaseEl) return;
+      phaseEl.textContent = phase;
+      var track = el("boot-track");
+      var mb = function (n) { return (n / 1e6).toFixed(1); };
+      if (got == null) { track.hidden = true; el("boot-bytes").textContent = ""; return; }
+      track.hidden = !total;
+      if (total) {
+        var pct = Math.min(100, Math.round(100 * got / total));
+        el("boot-fill").style.width = pct + "%";
+        track.setAttribute("aria-valuenow", pct);
+      }
+      el("boot-bytes").textContent = total ? mb(got) + " of " + mb(total) + " MB" : mb(got) + " MB";
+    };
+    var failed = function (why) {
+      location.replace("fallback.html?reason=" + encodeURIComponent("The viewer could not be loaded: " + why));
+    };
+    var plain = window.fetch;
+    window.fetch = function (input) {
+      var url = typeof input === "string" ? input : (input && input.url) || String(input);
+      var result = plain.apply(this, arguments);
+      if (!/\.wasm([?#]|$)/.test(url)) return result;
+      return result.then(function (r) {
+        if (!r.ok) { failed("HTTP " + r.status); return r; }
+        if (!r.body) return r;
+        var length = +r.headers.get("content-length") || 0;
+        var total = r.headers.get("content-encoding") ? WASM_BYTES : (length || WASM_BYTES);
+        var got = 0;
+        var reader = r.body.getReader();
+        show("Downloading the viewer", 0, total);
+        var body = new ReadableStream({
+          pull: function (c) {
+            return reader.read().then(function (x) {
+              if (x.done) { show("Loading the sheet\u2026"); c.close(); return; }
+              got += x.value.length;
+              show("Downloading the viewer", got, total);
+              c.enqueue(x.value);
+            }, function (e) { failed(String(e)); c.error(e); });
+          },
+          cancel: function (why) { return reader.cancel(why); }
+        });
+        return new Response(body, { status: r.status, statusText: r.statusText, headers: r.headers });
+      }, function (e) { failed(String(e)); throw e; });
+    };
+  })();
+</script>
+<link rel="stylesheet" href="./theme.css" integrity="sha384&#x2D;eoouZHWCym1vIXp2KEIzD1YiKNOyWxrGAdYGDvcxxnqORW6FKJ7dKayIJXLVBT5Z"/>
 
 
 
 
-<script type="module" nonce="7EamV3ngSYnDTYTqpX5YrQ==">
+<script type="module" nonce="5aEqVHiaza95cNE85wpe+g==">
 import init, * as bindings from './lmsheets-inspect-web.js';
 const wasm = await init({ module_or_path: './lmsheets-inspect-web_bg.wasm' });
 
@@ -29,6 +86,14 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-<link rel="modulepreload" href="./lmsheets-inspect-web.js" crossorigin=anonymous integrity="sha384-1Y8p4ADTwbekFOp5M+/lUZnHM9M9uWO2f49tKJYm0LdTbmlIDOTtgKdygolCU58E"><link rel="preload" href="./lmsheets-inspect-web_bg.wasm" crossorigin=anonymous integrity="sha384-ZotKdXHm2MbPtf2C7jLq4slB2HFnr6oVEbtMFG/w9JciESeQzAY1/p+v9SCxYgK2" as="fetch" type="application/wasm"></head>
-<body></body>
+<link rel="modulepreload" href="./lmsheets-inspect-web.js" crossorigin=anonymous integrity="sha384-i90osjXE3y25nxMwdw3C3efCsceULaEgP3Cix9UzCViBSHb3I5ezvn7fld1Dr1AS"><link rel="preload" href="./lmsheets-inspect-web_bg.wasm" crossorigin=anonymous integrity="sha384-dPYzR57S1PMprbpAROwPbrrPjPlvjaNp5SdQLh4/nV2EE/HyLEuouPl5QrQEP7RR" as="fetch" type="application/wasm"></head>
+<body>
+<div id="boot" role="status">
+  <div class="box">
+    <div class="phase" id="boot-phase">Loading the viewer…</div>
+    <div class="bar-track" id="boot-track" role="progressbar" aria-label="Download" aria-valuemin="0" aria-valuemax="100" hidden><div class="bar-fill" id="boot-fill"></div></div>
+    <div class="bytes" id="boot-bytes"></div>
+  </div>
+</div>
+</body>
 </html>

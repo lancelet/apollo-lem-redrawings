@@ -13,11 +13,76 @@
     location.replace("fallback.html?reason=" + encodeURIComponent("WebGPU is not available in this browser."));
   }
 </script>
+<script>
+  // The indicator in <body> (#boot): the viewer's download with its bytes, then
+  // the sheet's loading; the viewer removes it when the first frame is drawn.
+  // The .wasm is the bulk of a first visit, so its response body is counted as
+  // it streams. Its length is the Content-Length when the body comes as it is;
+  // a compressed body's is the compressed length, so then site.sh's WASM_BYTES
+  // (the file's size) stands in, or only the bytes received are shown.
+  (function () {
+    var WASM_BYTES = 0; // the wasm file's size, set by site.sh
+    var el = function (id) { return document.getElementById(id); };
+    var show = function (phase, got, total) {
+      var phaseEl = el("boot-phase");
+      if (!phaseEl) return;
+      phaseEl.textContent = phase;
+      var track = el("boot-track");
+      var mb = function (n) { return (n / 1e6).toFixed(1); };
+      if (got == null) { track.hidden = true; el("boot-bytes").textContent = ""; return; }
+      track.hidden = !total;
+      if (total) {
+        var pct = Math.min(100, Math.round(100 * got / total));
+        el("boot-fill").style.width = pct + "%";
+        track.setAttribute("aria-valuenow", pct);
+      }
+      el("boot-bytes").textContent = total ? mb(got) + " of " + mb(total) + " MB" : mb(got) + " MB";
+    };
+    var failed = function (why) {
+      location.replace("fallback.html?reason=" + encodeURIComponent("The viewer could not be loaded: " + why));
+    };
+    var plain = window.fetch;
+    window.fetch = function (input) {
+      var url = typeof input === "string" ? input : (input && input.url) || String(input);
+      var result = plain.apply(this, arguments);
+      if (!/\.wasm([?#]|$)/.test(url)) return result;
+      return result.then(function (r) {
+        if (!r.ok) { failed("HTTP " + r.status); return r; }
+        if (!r.body) return r;
+        var length = +r.headers.get("content-length") || 0;
+        var total = r.headers.get("content-encoding") ? WASM_BYTES : (length || WASM_BYTES);
+        var got = 0;
+        var reader = r.body.getReader();
+        show("Downloading the viewer", 0, total);
+        var body = new ReadableStream({
+          pull: function (c) {
+            return reader.read().then(function (x) {
+              if (x.done) { show("Loading the sheet\u2026"); c.close(); return; }
+              got += x.value.length;
+              show("Downloading the viewer", got, total);
+              c.enqueue(x.value);
+            }, function (e) { failed(String(e)); c.error(e); });
+          },
+          cancel: function (why) { return reader.cancel(why); }
+        });
+        return new Response(body, { status: r.status, statusText: r.statusText, headers: r.headers });
+      }, function (e) { failed(String(e)); throw e; });
+    };
+  })();
+</script>
 <link data-trunk rel="css" href="theme.css">
 <link data-trunk rel="copy-file" href="fallback.html">
 <link data-trunk rel="copy-file" href="about.html">
 <link data-trunk rel="copy-dir" href="fonts">
-<link data-trunk rel="rust" data-bindgen-target="web" />
+<link data-trunk rel="rust" data-cargo-profile="web" data-wasm-opt="z" data-bindgen-target="web" />
 </head>
-<body></body>
+<body>
+<div id="boot" role="status">
+  <div class="box">
+    <div class="phase" id="boot-phase">Loading the viewer…</div>
+    <div class="bar-track" id="boot-track" role="progressbar" aria-label="Download" aria-valuemin="0" aria-valuemax="100" hidden><div class="bar-fill" id="boot-fill"></div></div>
+    <div class="bytes" id="boot-bytes"></div>
+  </div>
+</div>
+</body>
 </html>

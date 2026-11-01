@@ -9,7 +9,8 @@
 # throughout (trunk's --public-url ./), so it works under any sub-path such as
 # /apollo-lem-redrawings/. OUTDIR is emptied first.
 #
-# OUTDIR gets: index.html, the wasm and its script, theme.css, fonts, about.html,
+# OUTDIR gets: index.html, the wasm and its script, theme.css, fonts (the subsets
+# of fonts-src/, tools/publish/subset-fonts.sh), about.html,
 # fallback.html (the page for a browser without WebGPU), index.json (the sheets),
 # sheets/<drawing>/sh<N>/ (the bundles), .nojekyll and README.md.
 set -e
@@ -39,6 +40,11 @@ export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$HOME=~ --remap-path-prefix
 
 find "$OUT" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 cp -R "$SCRATCH/dist/." "$OUT/"
+# The loading indicator's length for the wasm when a server compresses it (the
+# Content-Length is then the compressed length): the file's own size.
+WASM="$(ls "$OUT"/*.wasm)"
+sed -i.bak "s|var WASM_BYTES = 0;|var WASM_BYTES = $(wc -c < "$WASM" | tr -d ' ');|" "$OUT/index.html"
+rm "$OUT/index.html.bak"
 touch "$OUT/.nojekyll"
 
 # The sheets, and their index.

@@ -18,7 +18,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         ".json": "application/json",
         ".css": "text/css",
         ".bin": "application/octet-stream",
-        ".ttf": "font/ttf",
+        ".woff2": "font/woff2",
         "": "application/octet-stream",
     }
 

@@ -5,7 +5,7 @@
 //! - **Scan pane, zoomed in** (`zoom >= OWNER_ZOOM`, screen px per crop px):
 //!   cursor -> crop px -> owner tile -> pixel value -> node, through
 //!   `owners.json`. Ink is a pixel or two wide, so the nearest owned pixel
-//!   within [`PICK_PX`] screen px wins (ties: the lowest row, then column).
+//!   within the reach wins (ties: the lowest row, then column).
 //!   *Known limit:* where several nodes claim a pixel the map keeps the
 //!   lowest node index; the others cannot be picked there.
 //! - **Scan pane, zoomed out, or the tile not loaded yet:** the cursor goes
@@ -39,8 +39,17 @@ use std::collections::BTreeMap;
 /// fetched exactly when full-resolution scan tiles are.
 pub const OWNER_ZOOM: f64 = 0.5;
 
-/// How far from the pointer a line is still picked, screen px.
+/// How far from the pointer a line is still picked, screen px, in
+/// [`Picker::pick`] (the tests' reach; the viewer passes its own to
+/// [`Picker::pick_within`]).
 pub const PICK_PX: f64 = 4.0;
+
+/// The viewer's reach for a mouse, CSS px (times the device pixel ratio for
+/// [`Picker::pick_within`]): near a line is enough, on it is not needed.
+pub const REACH_CSS_PX: f64 = 10.0;
+
+/// The reach for a finger, CSS px: a fingertip covers more than a cursor.
+pub const REACH_TOUCH_CSS_PX: f64 = 20.0;
 
 /// The least width of a lit member's line, screen px, at any zoom: the
 /// highlight is always visible, zoomed out to the whole sheet too.
@@ -57,8 +66,10 @@ const OUTLINE_STEP_MM: f64 = 2.0;
 /// The most pieces one curve of an outline is cut into.
 const OUTLINE_MAX_PIECES: usize = 256;
 
-/// The most crop px the owner search looks from the pointer.
-const MAX_SEARCH_CROP_PX: f64 = 16.0;
+/// The most crop px the owner search looks from the pointer (a reach of
+/// 20 CSS px at a device pixel ratio of 3 and the least owner zoom is 120;
+/// beyond this the search would cost more than a pointer move is worth).
+const MAX_SEARCH_CROP_PX: f64 = 64.0;
 
 /// The bundle's node table (`owners/owners.json`): node `i` is
 /// `(kind, name)`.
@@ -499,12 +510,17 @@ impl Picker {
     }
 
     /// The node under pane pixel `at` of `pane` in the model's current
-    /// cameras.
+    /// cameras, within [`PICK_PX`].
     pub fn pick(&self, m: &Model, pane: Pane, at: (f64, f64)) -> Option<NodeId> {
+        self.pick_within(m, pane, at, PICK_PX)
+    }
+
+    /// The node nearest pane pixel `at` of `pane` within `reach` pane px.
+    pub fn pick_within(&self, m: &Model, pane: Pane, at: (f64, f64), reach: f64) -> Option<NodeId> {
         match pane {
             Pane::Redraw => {
                 let paper = m.paper_at(at)?;
-                let i = hit_test_where(&self.items, paper, PICK_PX / m.scale(), |i| {
+                let i = hit_test_where(&self.items, paper, reach / m.scale(), |i| {
                     self.item_visible(m, i)
                 })?;
                 self.items[i].node
@@ -516,7 +532,7 @@ impl Picker {
                     let (x, y) = (crop.0.floor() as i64, crop.1.floor() as i64);
                     // Authoritative once the pointer's tile is held.
                     if self.owners.value_at(x, y).is_some() {
-                        let r = (PICK_PX / cam.zoom).min(MAX_SEARCH_CROP_PX);
+                        let r = (reach / cam.zoom).min(MAX_SEARCH_CROP_PX);
                         return self
                             .owners
                             .nearest_where(crop, r, |n| self.node_visible(m, n));
@@ -524,7 +540,7 @@ impl Picker {
                 }
                 let paper = m.chain().scan_to_paper(crop);
                 let per_mm = Chain::scan_per_mm(m.chain(), paper);
-                let tol = PICK_PX / cam.zoom / per_mm;
+                let tol = reach / cam.zoom / per_mm;
                 let i = hit_test_where(&self.items, paper, tol, |i| self.item_visible(m, i))?;
                 self.items[i].node
             }

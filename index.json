@@ -4,7 +4,10 @@
       "id": "LDW280-17619/sh3",
       "title": "LDW280-17619 sh3",
       "path": "sheets/LDW280-17619/sh3/",
-      "fallback": {}
+      "fallback": {
+        "redraw": "fallback/redraw.png",
+        "scan": "fallback/scan.png"
+      }
     }
   ]
 }

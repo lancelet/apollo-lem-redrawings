@@ -60,6 +60,17 @@ fn reduced_motion() -> bool {
         .is_some_and(|m| m.matches())
 }
 
+/// Take down the loading indicator (index.html's `#boot`), once the sheet is
+/// drawn or the viewer has failed and says why.
+fn remove_boot() {
+    if let Some(e) = window()
+        .document()
+        .and_then(|d| d.get_element_by_id("boot"))
+    {
+        e.remove();
+    }
+}
+
 /// Go to the static page, saying why.
 fn to_fallback(reason: &str) {
     let enc: String = js_sys::encode_uri_component(reason).into();
@@ -218,6 +229,7 @@ fn PaneCanvas(
             let at = px(&handle, ev.offset_x() as f64, ev.offset_y() as f64);
             let by = px(&handle, ev.movement_x() as f64, ev.movement_y() as f64);
             if let Some(s) = handle.borrow_mut().as_mut() {
+                s.set_coarse(false);
                 s.set_alt(ev.alt_key());
                 s.set_shift(ev.shift_key());
                 if dragging.get() {
@@ -524,6 +536,7 @@ pub fn App() -> impl IntoView {
             if !webgpu_available() || query("nogpu").is_some() {
                 to_fallback("WebGPU is not available in this browser.");
                 fail.set("WebGPU is not available in this browser.".into());
+                remove_boot();
                 return;
             }
             let css = (stage.client_width() as f64, stage.client_height() as f64);
@@ -596,6 +609,7 @@ pub fn App() -> impl IntoView {
                             to_fallback(&e);
                         }
                         fail.set(e);
+                        remove_boot();
                     }
                 }
             });
@@ -671,6 +685,7 @@ pub fn App() -> impl IntoView {
         let stats = Rc::new(RefCell::new(FrameStats::new(2000.0)));
         let last = Rc::new(Cell::new(None::<f64>));
         let shown_at = Rc::new(Cell::new(0.0f64));
+        let booted = Cell::new(false);
         let tick: Tick = Rc::new(RefCell::new(None));
         let again = tick.clone();
         *tick.borrow_mut() = Some(Closure::new(move |t: f64| {
@@ -688,12 +703,19 @@ pub fn App() -> impl IntoView {
                 }
                 match s.frame(benching) {
                     Ok(Some(ms)) => {
+                        // The first drawn frame: the sheet is up.
+                        if !booted.replace(true) {
+                            remove_boot();
+                        }
                         if let Some(b) = bench.borrow_mut().as_mut() {
                             b.encode.push(t, ms);
                         }
                     }
                     Ok(None) => {}
-                    Err(e) => fail.set(e),
+                    Err(e) => {
+                        fail.set(e);
+                        remove_boot();
+                    }
                 }
                 let seen = (s.model.pinned().map(|p| p.head), s.model.details_open());
                 if seen != pin_seen.get() {
