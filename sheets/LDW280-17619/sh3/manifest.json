@@ -1,0 +1,834 @@
+{
+  "format": "lmsheets-bundle/1",
+  "drawing": "LDW280-17619",
+  "sheet": "sh3",
+  "frame": "LDW280-17619_DW_003_1374",
+  "models": {
+    "pixelnet": "r3b@110000",
+    "strokenet": "r3b@48000"
+  },
+  "hops": [
+    {
+      "kind": "card",
+      "nara_box": 511,
+      "provenance": {
+        "evidence": [
+          {
+            "doc": "https://archive.org/metadata/apertureCardBox511Part1NARASW_images",
+            "at": "description: 'part 1/3 of aperture-card box 511 stored at the National Archives Southwest branch in Fort Worth, Texas'"
+          },
+          {
+            "doc": "Virtual AGC index LemDrawingIndexBox511.html (apollo-lunar-module/reference/indexes/virtualagc-lm-drawings/lm_drawing_index.csv)",
+            "at": "box 511, LDW280-17619 rev -, DW 003.0000 frame 01"
+          }
+        ],
+        "method": {
+          "kind": "read"
+        },
+        "status": {
+          "kind": "provisional"
+        },
+        "by": {
+          "kind": "claude"
+        },
+        "when": "2026-10-26",
+        "note": "the card's own position in the box is not recorded"
+      }
+    },
+    {
+      "kind": "upload",
+      "item": "apertureCardBox511Part1NARASW_images",
+      "tar": "apertureCardBox511Part1NARASW_images.tar",
+      "member": "apertureCardBox511Part1NARASW_images/1374_LDW280_17619___DW_003.0000_01_ BLDW280-17619   26512    -00001010003.    01     AN     .png",
+      "original": {
+        "url": "https://archive.org/download/apertureCardBox511Part1NARASW_images/apertureCardBox511Part1NARASW_images.tar/apertureCardBox511Part1NARASW_images/1374_LDW280_17619___DW_003.0000_01_%20BLDW280-17619%20%20%2026512%20%20%20%20-00001010003.%20%20%20%2001%20%20%20%20%20AN%20%20%20%20%20.png",
+        "hash": "sha256:c32ec7a3318dc4fcfd48d360fcf5f63a761a9d401efa5df77334eb627feb4102",
+        "size": 394581
+      },
+      "rendering": {
+        "page": 1374,
+        "url": "https://archive.org/download/apertureCardBox511Part1NARASW_images/page/n1374_w10592.jpg",
+        "hash": "sha256:150b914a3abc2dfdbe59bf05bd02c431f50ab695e8a43c1449aa6b7b38d4235f",
+        "size": 3338232
+      },
+      "rights": {
+        "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/"
+      },
+      "provenance": {
+        "evidence": [
+          {
+            "doc": "our download manifest of the archive.org items (one row per item)",
+            "at": "row 511,apertureCardBox511Part1NARASW_images,apertureCardBox511Part1NARASW_images.tar,761651200,md5 826e21374127d7ecf808b1990506e68f,ok"
+          },
+          {
+            "doc": "https://archive.org/download/apertureCardBox511Part1NARASW_images/apertureCardBox511Part1NARASW_images.tar",
+            "at": "tar -t: entry 68; tar -xO of it hashed (sha-256)"
+          },
+          {
+            "doc": "Virtual AGC index LemDrawingIndexBox511.html (apollo-lunar-module/reference/indexes/virtualagc-lm-drawings/lm_drawing_index.csv)",
+            "at": "511,apertureCardBox511Part1NARASW_images,1374,LDW280-17619,-,DW,003.0000,01"
+          },
+          {
+            "doc": "https://archive.org/metadata/apertureCardBox511Part1NARASW_images",
+            "at": "licenseurl; the metadata has no 'rights' field"
+          },
+          {
+            "doc": "our download, 2026-10-26",
+            "at": "curl of the rendering's URL: HTTP 302 to ia902804.us.archive.org BookReaderImages.php, then 200 image/jpeg, no Access-Control-Allow-Origin"
+          },
+          {
+            "doc": "our download, 2026-10-27",
+            "at": "curl of the original's URL: HTTP 302 to view_archive.php, then 200 image/png, Access-Control-Allow-Origin *; 394,581 bytes, sha-256 equal to the member's"
+          }
+        ],
+        "method": {
+          "kind": "read"
+        },
+        "status": {
+          "kind": "provisional"
+        },
+        "by": {
+          "kind": "claude"
+        },
+        "when": "2026-10-26",
+        "note": "the original (the tar member, served from inside the tar) is canonical: a 1-bit PNG, 10592 x 7392, binarised before upload (the item's description says parts 1 and 2 are B&W scans). The rendering is a reference only, not canonical: archive.org renders it on request, 8-bit grayscale 10592 x 7392, the same sheet by eye at 1200 px, and a later fetch may differ in its bytes"
+      }
+    },
+    {
+      "kind": "derived",
+      "file": "1374_LDW280_17619___DW_003.0000_01_ BLDW280-17619  26512  -00001010003.  01   AN   .png",
+      "made": "the member's bytes unchanged, named as in the tar with each pair of spaces made one",
+      "tool": "apollo-lunar-module/scripts/extract_drawing.py (snapshot commit d3ed250, 2026-10-14)",
+      "hashes": [
+        "sha256:c32ec7a3318dc4fcfd48d360fcf5f63a761a9d401efa5df77334eb627feb4102"
+      ],
+      "provenance": {
+        "evidence": [
+          {
+            "doc": "1374_LDW280_17619___DW_003.0000_01_ BLDW280-17619  26512  -00001010003.  01   AN   .png",
+            "at": "sha-256 equal to the member's"
+          },
+          {
+            "doc": "apollo-lunar-module/scripts/extract_drawing.py",
+            "at": "writes extracted/<drawing>/ with b.replace('  ', ' '), the rename this file's name shows"
+          }
+        ],
+        "method": {
+          "kind": "estimated"
+        },
+        "status": {
+          "kind": "provisional"
+        },
+        "by": {
+          "kind": "claude"
+        },
+        "when": "2026-10-26",
+        "note": "the script is inferred from the rename and the directory; the file is dated 2026-10-13 23:46 and no run log was found"
+      },
+      "from": "sha256:c32ec7a3318dc4fcfd48d360fcf5f63a761a9d401efa5df77334eb627feb4102"
+    },
+    {
+      "kind": "derived",
+      "file": "data/dev/LDW280-17619-sh3/LDW280-17619-sh3.png",
+      "made": "a copy of the extracted file, bytes unchanged; no binarisation or crop (the crop is the registration's, the whole frame)",
+      "hashes": [
+        "sha256:c32ec7a3318dc4fcfd48d360fcf5f63a761a9d401efa5df77334eb627feb4102",
+        "fnv1a64:815e1921c1dd6dd9"
+      ],
+      "provenance": {
+        "evidence": [
+          {
+            "doc": "data/dev/LDW280-17619-sh3/LDW280-17619-sh3.png",
+            "at": "sha-256 equal to the extracted file's; fnv1a64 as in the sketch"
+          },
+          {
+            "doc": "data/dev/LDW280-17619-sh3/source.json",
+            "at": "archive: the extracted file's path"
+          }
+        ],
+        "method": {
+          "kind": "estimated"
+        },
+        "status": {
+          "kind": "provisional"
+        },
+        "by": {
+          "kind": "claude"
+        },
+        "when": "2026-10-26",
+        "note": "the command that copied it is not recorded (the file is dated 2026-10-22 15:59)"
+      },
+      "from": "sha256:c32ec7a3318dc4fcfd48d360fcf5f63a761a9d401efa5df77334eb627feb4102"
+    }
+  ],
+  "original": {
+    "url": "https://archive.org/download/apertureCardBox511Part1NARASW_images/apertureCardBox511Part1NARASW_images.tar/apertureCardBox511Part1NARASW_images/1374_LDW280_17619___DW_003.0000_01_%20BLDW280-17619%20%20%2026512%20%20%20%20-00001010003.%20%20%20%2001%20%20%20%20%20AN%20%20%20%20%20.png",
+    "hash": "sha256:c32ec7a3318dc4fcfd48d360fcf5f63a761a9d401efa5df77334eb627feb4102",
+    "size": 394581,
+    "note": "the full scan, as archived; not in this bundle"
+  },
+  "fallback": {
+    "redraw": "fallback/redraw.png",
+    "scan": "fallback/scan.png",
+    "note": "for a browser without WebGPU: the redraw on its paper, the scan's coarsest level"
+  },
+  "full_scan_in_bundle": false,
+  "full_scan_note": "cropped; fetch the original by its url and hash to line it up with the crop offset",
+  "rights": {
+    "state": "recorded",
+    "recorded": {
+      "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/"
+    },
+    "note": "as the archive item's metadata states; not independently checked"
+  },
+  "frame_size": [
+    10592,
+    7392
+  ],
+  "crop": {
+    "offset": [
+      2039,
+      1615
+    ],
+    "size": [
+      6623,
+      4364
+    ],
+    "box_px": [
+      2039,
+      1615,
+      8662,
+      5979
+    ],
+    "margin_px": 120,
+    "border_px": [
+      2334.3834253493474,
+      1882.5903249442028,
+      8339.997604850338,
+      5659.778647105219
+    ],
+    "claimed_px": [
+      2159,
+      1735,
+      8542,
+      5859
+    ],
+    "basis": "the form's border (through the registration) and every pixel claimed as line, lettering or arrowhead, plus the margin",
+    "coordinates": "document.json, strokes.bin and keypoints.bin are in frame px; tile px = frame px - offset"
+  },
+  "pyramid": {
+    "format": "webp-lossless",
+    "colour": "8-bit grey",
+    "tile": 1024,
+    "overview_max_px": 2048,
+    "path": "frames/L{level}/{x}_{y}.webp",
+    "levels": [
+      {
+        "level": 0,
+        "scale": 1,
+        "size": [
+          6623,
+          4364
+        ],
+        "tiles": [
+          7,
+          5
+        ]
+      },
+      {
+        "level": 1,
+        "scale": 2,
+        "size": [
+          3312,
+          2182
+        ],
+        "tiles": [
+          4,
+          3
+        ]
+      },
+      {
+        "level": 2,
+        "scale": 4,
+        "size": [
+          1656,
+          1091
+        ],
+        "tiles": [
+          2,
+          2
+        ]
+      }
+    ]
+  },
+  "kinds": {
+    "format": "png, indexed, 4 bit",
+    "path": "kinds/{x}_{y}.png",
+    "tile": 1024,
+    "palette": [
+      "stroke",
+      "text",
+      "terminator",
+      "pencil",
+      "foreign",
+      "noise",
+      "unsure",
+      "paper"
+    ],
+    "resolution": "full only, in the crop"
+  },
+  "owners": {
+    "format": "png, 16 bit grey, big-endian",
+    "path": "owners/{x}_{y}.png",
+    "tile": 1024,
+    "index": "owners/owners.json"
+  },
+  "strokes": {
+    "path": "strokes.bin",
+    "layout": "bundle.rs module comment; frame px, 1/8 px"
+  },
+  "keypoints": {
+    "path": "keypoints.bin",
+    "layout": "bundle.rs module comment; frame px, 1/8 px"
+  },
+  "registration": {
+    "chain": "frame px -> crop -> warp -> rotation -> paper px -> paper mm, in document.json frames.scan.registration",
+    "scan_to_paper": "closed form: the chain forward",
+    "paper_to_scan": "the warp's fixed point, or registration.bin",
+    "grid": {
+      "path": "registration.bin",
+      "maps": "paper mm to crop px",
+      "format": "little-endian f32 (x, y) pairs, row-major, row j then column i",
+      "origin_mm": [
+        -12.0,
+        -10.0
+      ],
+      "step_mm": 2.0,
+      "nx": 230,
+      "ny": 153,
+      "bilinear_max_error_px": 0.000764761449068659,
+      "error_sample": 4000
+    }
+  },
+  "form": "ENG-73.1_6-64",
+  "public": true,
+  "edit_log": null,
+  "files": {
+    "document.json": {
+      "sha256": "6b55bbcbf2077711186cf96978e759bdd602cc60c59c0a719acfb6abba31563b",
+      "bytes": 1785179
+    },
+    "fallback/redraw.png": {
+      "sha256": "e8478cadd2a53fcbe6288d03740da5d2e38dd4ea0867882a93cca176b1f11e4d",
+      "bytes": 96257
+    },
+    "fallback/scan.png": {
+      "sha256": "787a2fe192f090f8d297e15050f8353efb18d62a08a9b7533ac3f8c47ef31ae8",
+      "bytes": 78105
+    },
+    "forms/ENG-73.1_6-64.json": {
+      "sha256": "00af243bf7d0ca788b51a4a204626c63678ce3dd2bd3db7a4142b9da08914654",
+      "bytes": 16554
+    },
+    "frames/L0/0_0.webp": {
+      "sha256": "d9f91f7fa6711a74d1dc3f0c94d81fd6c3912a439292b47e7db80c024366f8e6",
+      "bytes": 1510
+    },
+    "frames/L0/0_1.webp": {
+      "sha256": "97f0e5152844ff6b10a52fefc065fc2c96623dc31202b841e7a3c4e17d9186e2",
+      "bytes": 1186
+    },
+    "frames/L0/0_2.webp": {
+      "sha256": "174d8c29f6c1a13b318ad4c54144f444d704555cf43dffa8e062d8c21a6360dd",
+      "bytes": 1126
+    },
+    "frames/L0/0_3.webp": {
+      "sha256": "a16820bdd5fd6250f775414fa5b095874b65ce01e86544a81421c43a6a3f3ace",
+      "bytes": 1614
+    },
+    "frames/L0/0_4.webp": {
+      "sha256": "bd75d01de411611f8d4ac570d9e389019d2d5e3d723448c0ad3b0e0dbc047cb3",
+      "bytes": 782
+    },
+    "frames/L0/1_0.webp": {
+      "sha256": "88883f2e218a80ad5ca9e4ccda73fe89ca67f2930b3e98013052b368d2f17658",
+      "bytes": 1412
+    },
+    "frames/L0/1_1.webp": {
+      "sha256": "b285d02d2440464505b269fc5e0d392376edd5607e03b8a1eb85fa87582b2beb",
+      "bytes": 8756
+    },
+    "frames/L0/1_2.webp": {
+      "sha256": "ea514c780b18386c3debc3461275afe288feb27226a359242b43f7b2a1a063db",
+      "bytes": 1290
+    },
+    "frames/L0/1_3.webp": {
+      "sha256": "7195e3998255eae843cfb2b35062811acad85809aafcd033db168dd2a6298251",
+      "bytes": 828
+    },
+    "frames/L0/1_4.webp": {
+      "sha256": "77da5d6e2c69bcadf9eda355d5dc6b31a6acd0a9c1a99b13fc6291045f317683",
+      "bytes": 338
+    },
+    "frames/L0/2_0.webp": {
+      "sha256": "1903aa3bf952cab88db3752381cf70cc5371d679c3ff1b25759028c8e27ade10",
+      "bytes": 1160
+    },
+    "frames/L0/2_1.webp": {
+      "sha256": "bca08fdba6f94f3397cd8759e992d829a3ac3505015efa13beeb3906bf383466",
+      "bytes": 6968
+    },
+    "frames/L0/2_2.webp": {
+      "sha256": "5e9a8d17885d48814089736a7f1e22cf4e3218f59544f86b9125deaa944b1d55",
+      "bytes": 2990
+    },
+    "frames/L0/2_3.webp": {
+      "sha256": "ab1fe3eb104dcd45541b70cf7cff2f682e1c788a02745455a967f14bf37273c9",
+      "bytes": 812
+    },
+    "frames/L0/2_4.webp": {
+      "sha256": "19fdf005b3ec2a8e19a7d86b0b50363d16094be23b2a067d4d2e2131f7e0193d",
+      "bytes": 320
+    },
+    "frames/L0/3_0.webp": {
+      "sha256": "a2512209d858425e8dbd1e5350a34e57437ab3b3bf9dced6e5a5bea534c12a1c",
+      "bytes": 1058
+    },
+    "frames/L0/3_1.webp": {
+      "sha256": "a652c91abe54e99d15fd63425e84b4a3261d9c1414edfe44cf1611db66627366",
+      "bytes": 686
+    },
+    "frames/L0/3_2.webp": {
+      "sha256": "73f8dd4bbb0be206211e2ea1bf24dde4147b37f270d7e9138d9f97dd9a313628",
+      "bytes": 970
+    },
+    "frames/L0/3_3.webp": {
+      "sha256": "d8b3f7c8c6144a90ef349c97223d4959db4c8f1036960fd8ff87938e88347bfe",
+      "bytes": 1328
+    },
+    "frames/L0/3_4.webp": {
+      "sha256": "03a3d1c94a5d94506de0510cc7ac236e04128932c59425b067860f3b52990672",
+      "bytes": 446
+    },
+    "frames/L0/4_0.webp": {
+      "sha256": "7af91e3f2ade13e5282c999f9bd35ea27cb57032c1f5d0d0aecfdef8e36a2930",
+      "bytes": 1458
+    },
+    "frames/L0/4_1.webp": {
+      "sha256": "ecae77bc6390ac4d5abfd04f104f3621c895c448f00b6deaca2339f7fef45fa1",
+      "bytes": 5076
+    },
+    "frames/L0/4_2.webp": {
+      "sha256": "b54d5f422f5a4f741c100cb8451085d9cf79cc7acffdea0b40deafc878346d0d",
+      "bytes": 540
+    },
+    "frames/L0/4_3.webp": {
+      "sha256": "a6d5832bff28ee3fc9779a501e4d789c679870073682c5ca9d4e3fe90c65b103",
+      "bytes": 7120
+    },
+    "frames/L0/4_4.webp": {
+      "sha256": "9d89854e2534eafa4bc57024b995fc3916ffc74f32a7165252decf5e0c23bdba",
+      "bytes": 526
+    },
+    "frames/L0/5_0.webp": {
+      "sha256": "d425c1e8f2f15fd7585c803fa7628892f1e93c9d5fb3efc1c70419e62223d095",
+      "bytes": 15890
+    },
+    "frames/L0/5_1.webp": {
+      "sha256": "e7edd7e081e7ecdc0e5a4a352821915c415a6c59d72662188119bb63d5063cee",
+      "bytes": 2420
+    },
+    "frames/L0/5_2.webp": {
+      "sha256": "a19d9e8e1ad510dab44744c3d865bde54c9bf373c511e860027e87f5c87d041b",
+      "bytes": 554
+    },
+    "frames/L0/5_3.webp": {
+      "sha256": "dd9ab7ac60ab05e095c96269904954b9066402dcdd327844cbac79c96df68298",
+      "bytes": 7854
+    },
+    "frames/L0/5_4.webp": {
+      "sha256": "020684ec0f306a70b8c9a7b79046fb0c72fffe3c41f5cc1ad082b41a41397444",
+      "bytes": 710
+    },
+    "frames/L0/6_0.webp": {
+      "sha256": "7fbada214e6fcf562f3bab0cb26cfcebce183e12598580b340495b55f5902ebc",
+      "bytes": 1200
+    },
+    "frames/L0/6_1.webp": {
+      "sha256": "2cb9ee5319bce6d9d716530fbab9f1fc1c1291fad75dbbd86d25c34e9e71e9fb",
+      "bytes": 668
+    },
+    "frames/L0/6_2.webp": {
+      "sha256": "cae43e944cf193ad6f5e5dac9cdd50ba4ce18e03ee00af9cf9e99dbd2aeeef04",
+      "bytes": 1910
+    },
+    "frames/L0/6_3.webp": {
+      "sha256": "f583766d6488b287c416aa51cfb74708150a48e4e44a347c8b9a8cf3b9cfb7a2",
+      "bytes": 3240
+    },
+    "frames/L0/6_4.webp": {
+      "sha256": "21d08f907c6dfc56f04e4f3e54547b62789dc640b4061bd58c7f8d588dfec107",
+      "bytes": 280
+    },
+    "frames/L1/0_0.webp": {
+      "sha256": "375326dba5c7f00adc4ae536838263cd926872ce07116270a53a614e0301346b",
+      "bytes": 10824
+    },
+    "frames/L1/0_1.webp": {
+      "sha256": "d207e527b015b783e9a9592d3855acd5f34ef103880bc22534b8c27ae17f9d85",
+      "bytes": 3324
+    },
+    "frames/L1/0_2.webp": {
+      "sha256": "21d9dec7b160615c340729d453a853ea23f4302803aeb8ca1b6e7b7c11f20a33",
+      "bytes": 662
+    },
+    "frames/L1/1_0.webp": {
+      "sha256": "3882dc947ec390d9e380533efc1150b1efccef803d6c9dda369511d9da4b262d",
+      "bytes": 8132
+    },
+    "frames/L1/1_1.webp": {
+      "sha256": "370a483d60a293dcabbcba8ab7d72845385d06e2890186f3daf02aa239eafc5c",
+      "bytes": 4386
+    },
+    "frames/L1/1_2.webp": {
+      "sha256": "396a72488e2d8c2b60ba64aa03bb993f78324c87e20197f3d921b36a7d6f14af",
+      "bytes": 484
+    },
+    "frames/L1/2_0.webp": {
+      "sha256": "11fb61def9cfdc71c39493f36acc287fe80da957a8316e1a9e362d3901e7cbcc",
+      "bytes": 22728
+    },
+    "frames/L1/2_1.webp": {
+      "sha256": "b82d3a84c02906e453118f6122ebfb575a8019000aacce346b91b410efc782b9",
+      "bytes": 14578
+    },
+    "frames/L1/2_2.webp": {
+      "sha256": "0947dad0515c1bd842ed2a1de9416ad74f69970335af919586d1a96d32e83978",
+      "bytes": 778
+    },
+    "frames/L1/3_0.webp": {
+      "sha256": "2f525072bb5e905507d795ae6315784fcb1b04b1142a84bbcd8dbca39a81ae10",
+      "bytes": 1534
+    },
+    "frames/L1/3_1.webp": {
+      "sha256": "99312f63dabb1216ae60e6a1e5c8ceb0ddf955b11b70bf676c8d337103f93ef7",
+      "bytes": 4220
+    },
+    "frames/L1/3_2.webp": {
+      "sha256": "aac787e754e9edbe712ecc421fb7af7fb8c38a55f2709d6a68fd5a7a3c61e3b7",
+      "bytes": 212
+    },
+    "frames/L2/0_0.webp": {
+      "sha256": "1694d897e8c7cea51ac3f7941f463c44ffb31139c4b83c4e4a189870ba6ed6d8",
+      "bytes": 19250
+    },
+    "frames/L2/0_1.webp": {
+      "sha256": "389730852e7b44079857e9f85818c34bd84f3840d51d72ece759c7725e0b284c",
+      "bytes": 744
+    },
+    "frames/L2/1_0.webp": {
+      "sha256": "0ac279d9f457f9b17b953bcc5c65e001abffd7fc6f02caf6c2faf2ab31b0a1f1",
+      "bytes": 30098
+    },
+    "frames/L2/1_1.webp": {
+      "sha256": "be254ec1248868cf8e1df4980cf53f47466122d6f17ac00dac5c58b6ea3e5330",
+      "bytes": 614
+    },
+    "keypoints.bin": {
+      "sha256": "a9097ce1eb4704d39cf62f9c5400f6747e3d376bd0f3918732290729a4f6c3ce",
+      "bytes": 1925
+    },
+    "kinds/0_0.png": {
+      "sha256": "02a6205e27c4db2841e388c332538d4c5f9b80dd33678eb444078524dc037dfc",
+      "bytes": 3280
+    },
+    "kinds/0_1.png": {
+      "sha256": "bef9bd051253d6a4e7e32445e2f9a4889ab3b2948f0671f3b989735f9a046db5",
+      "bytes": 3115
+    },
+    "kinds/0_2.png": {
+      "sha256": "703f4dc003fea31abf7404bc1063692b31e0d59e37aa835b7f0edaae682ddf7f",
+      "bytes": 3056
+    },
+    "kinds/0_3.png": {
+      "sha256": "06f785f8370aadbdf1e809746d222729bda8664dc97e310e84591caed1d043f7",
+      "bytes": 3542
+    },
+    "kinds/0_4.png": {
+      "sha256": "1fa40fdaa2c91c7c4729ffa1973320a3864a639ea93c0f08ee381cf5b285d5ee",
+      "bytes": 1143
+    },
+    "kinds/1_0.png": {
+      "sha256": "bd5f27772365a70bd28e74bbbec5c8df1a73bda7981c50690d5a98abf863c4bf",
+      "bytes": 3044
+    },
+    "kinds/1_1.png": {
+      "sha256": "f7a5dc7bf7588da8284b7eff42600bcaad48ac5a5343823e5b7e7fc7b2c216f1",
+      "bytes": 12925
+    },
+    "kinds/1_2.png": {
+      "sha256": "ae240fcf9896e175af0f6c1d363e51f6ffa39018465b8abe757523ea91120892",
+      "bytes": 2965
+    },
+    "kinds/1_3.png": {
+      "sha256": "a04bfbff34280bce1554e274a87ae3d7f5e6adcd79bd1d8990729726b3c5de02",
+      "bytes": 2135
+    },
+    "kinds/1_4.png": {
+      "sha256": "1860b05ec379e1989c4923f57dd32eb5a58c7fc6a1b4a54d60732d837a9a4ab1",
+      "bytes": 766
+    },
+    "kinds/2_0.png": {
+      "sha256": "1ee80617b61f3ba4043576ae6251042874a3fbe37186ce6797acc9a434da66d1",
+      "bytes": 2650
+    },
+    "kinds/2_1.png": {
+      "sha256": "926aef1feaf27ebbc8396a697f59d832500afa80ce7c146f0ae8f1bbf919511c",
+      "bytes": 10558
+    },
+    "kinds/2_2.png": {
+      "sha256": "79cabd32c179f7fc50d95161b8a192c734ee96ee87dae50b9fab1e1891eee684",
+      "bytes": 4748
+    },
+    "kinds/2_3.png": {
+      "sha256": "5da2993e580a406025afbddd4215ef6961f9fdf8895ddee7c477eadabcbbe52d",
+      "bytes": 2044
+    },
+    "kinds/2_4.png": {
+      "sha256": "5e1860d53215e52a2cc005577a2887610a6f6ba3dd0e2de6d21b6428760c6b39",
+      "bytes": 746
+    },
+    "kinds/3_0.png": {
+      "sha256": "309c2c0fe921cea04b07c7f1d7984ecc04a00ae090ca4cb5aa08882081e8510d",
+      "bytes": 2713
+    },
+    "kinds/3_1.png": {
+      "sha256": "32bb27859d9d41b906820f03bd55f83363b49f80970e784a32e158ff5cb232cd",
+      "bytes": 2083
+    },
+    "kinds/3_2.png": {
+      "sha256": "418038e8df1331f17bfa6e838915341ab29049b4b9fda32cbd476ca21b2e204c",
+      "bytes": 2824
+    },
+    "kinds/3_3.png": {
+      "sha256": "44690494875d6419a3243384e2d6f804d1c23207b98fec6bae4665420084c158",
+      "bytes": 3197
+    },
+    "kinds/3_4.png": {
+      "sha256": "8a90ed082cce7c0b02a913c8079a3111560a83ade0a6c7449c0f6b940bce477d",
+      "bytes": 1092
+    },
+    "kinds/4_0.png": {
+      "sha256": "033ee582ee2788927340d780f4a9c8d3614042ff645f9c3df3336a9018584468",
+      "bytes": 3209
+    },
+    "kinds/4_1.png": {
+      "sha256": "f8bc36c00f7fbe034a68679f0ecb0d131517cafec8823053160ac027e7a7d3ab",
+      "bytes": 7343
+    },
+    "kinds/4_2.png": {
+      "sha256": "c348a7b07f4e67e28990ae3800418c1820fa1f48e116f036d224d960d6d67de4",
+      "bytes": 1926
+    },
+    "kinds/4_3.png": {
+      "sha256": "b0c12d18598c1068fbec912d06e4e615f6eb3dc0ff7d2b069b138d7570381528",
+      "bytes": 9735
+    },
+    "kinds/4_4.png": {
+      "sha256": "c58de6d986d59bbb4a490b7b852590bf60919204665a34b216d189253782c1a3",
+      "bytes": 879
+    },
+    "kinds/5_0.png": {
+      "sha256": "d4be3d53e43cdedd82761d4455ddd6ce3e3ecf43a6030f89178ae4f9fabc074b",
+      "bytes": 18948
+    },
+    "kinds/5_1.png": {
+      "sha256": "3d184ccd9e1633bd0f1cb5df19404512f5219f6a70f183228c306e0094c55808",
+      "bytes": 4163
+    },
+    "kinds/5_2.png": {
+      "sha256": "5b2865852bee56e28eda74136563388303bd6d5a94a2d9e78f51ceef122cc079",
+      "bytes": 1982
+    },
+    "kinds/5_3.png": {
+      "sha256": "6d1dd0729a0d969c31da411d17f4559317a25a7c62905ab5b0b195d7de70668d",
+      "bytes": 9889
+    },
+    "kinds/5_4.png": {
+      "sha256": "d7b9a2cb5b51e825f92bfb881cc34fc29424dceaad0194c688c2d892f26039aa",
+      "bytes": 1070
+    },
+    "kinds/6_0.png": {
+      "sha256": "6dd76bd85a9dd025a74817df2179440da171c84f4876a5b1ee7e89e2953b410a",
+      "bytes": 2653
+    },
+    "kinds/6_1.png": {
+      "sha256": "36e8509709a1f21a6d0b2ad97f5848d505fcd3a2c885ad336ab5f4daf1680089",
+      "bytes": 1802
+    },
+    "kinds/6_2.png": {
+      "sha256": "edbbd96941624b1b697c04c1fe1b694675d1f9578f87b0fff7699b149757990b",
+      "bytes": 3728
+    },
+    "kinds/6_3.png": {
+      "sha256": "2da23ae2d5738859523ff816c9ad8f3ec83e3b36f4022fbda0d9164f72b4272b",
+      "bytes": 5681
+    },
+    "kinds/6_4.png": {
+      "sha256": "267a21da8cfa853c42c4ee47e2ebe36fed82c667a151eefe196fdd4b38a2b275",
+      "bytes": 544
+    },
+    "owners/0_0.png": {
+      "sha256": "c6d94c29f0d0497fa7c58aac2c499d82c87cf60c4b56df39818f5e8869c2ab8c",
+      "bytes": 5827
+    },
+    "owners/0_1.png": {
+      "sha256": "b2451fdb64b4d6305b5a31f370ff282c5c7e8f4ee2f589814c515648ec89b3ef",
+      "bytes": 5668
+    },
+    "owners/0_2.png": {
+      "sha256": "3f5b8ec40d8aaee6eb5bcd20a663c9e31b92624ce66e152f9a612561efd17111",
+      "bytes": 5621
+    },
+    "owners/0_3.png": {
+      "sha256": "1f4617dfa2f5652d078f49ce4674fd352d1e8001787d922d89a403fb76715976",
+      "bytes": 6193
+    },
+    "owners/0_4.png": {
+      "sha256": "1670a506ce7643de4d86667e40051efec12a1def814a6815cce2ce0f55fcfda4",
+      "bytes": 1809
+    },
+    "owners/1_0.png": {
+      "sha256": "0e4cd7c6c9ed4407c30b45a60372d2d0ff3b9f0a6ac349091e57c61b1b3ebfa8",
+      "bytes": 5450
+    },
+    "owners/1_1.png": {
+      "sha256": "1a48a7cb384ae9600e9c0ecac479e7e6db0d7ee8f5e0259dc29016f8c7f9af10",
+      "bytes": 16527
+    },
+    "owners/1_2.png": {
+      "sha256": "9f2b8b5bf7b38383bf2753f4f973b539046e7e427c3ce4711236652a2a69f4b1",
+      "bytes": 5425
+    },
+    "owners/1_3.png": {
+      "sha256": "c83339e8dcc6f4281e4fe22b86d880d911e0d302b725c2183f6f497dc023dd18",
+      "bytes": 4550
+    },
+    "owners/1_4.png": {
+      "sha256": "29119fae41c5b093cee253aff01b840316401f634e95af3a5327d34ad1a459e7",
+      "bytes": 1392
+    },
+    "owners/2_0.png": {
+      "sha256": "79a13a033e9efc137c1d732d79273544b32401f513b359ab072bfcbd120522fc",
+      "bytes": 5163
+    },
+    "owners/2_1.png": {
+      "sha256": "9795c57ab8e789abbb06c2f40696217bf36ec2b50913fa65e5efeefa28cfc910",
+      "bytes": 13632
+    },
+    "owners/2_2.png": {
+      "sha256": "d80ee125800c8769fd3f5a8ef7b11f33cddae636f6243ed495ebe7ded06c7214",
+      "bytes": 7551
+    },
+    "owners/2_3.png": {
+      "sha256": "f2c784deee87ea1d1347fe6036db087660d7e87c6b3569e3efa3363e90465ec3",
+      "bytes": 4564
+    },
+    "owners/2_4.png": {
+      "sha256": "f0a8e9104efe326d7f4d549f547a0108d450d599475b5e0069b97b07ec1f28a9",
+      "bytes": 1342
+    },
+    "owners/3_0.png": {
+      "sha256": "09b1f06cde0e39e3314aaeb8ece0434c1982ac9692a78dbd8e2ac9ad724528c5",
+      "bytes": 5135
+    },
+    "owners/3_1.png": {
+      "sha256": "9202ca669ffe9ec36f17f0600017ee0f6bcd8c56e587d519bef8703403a03baa",
+      "bytes": 4499
+    },
+    "owners/3_2.png": {
+      "sha256": "efb4642f12fe6b07df5495aeb42e45d24a726781f2d96b34eaf6e491ec679d9f",
+      "bytes": 4828
+    },
+    "owners/3_3.png": {
+      "sha256": "b8d035eeaac0a86a9cc871457004be0aadba72246b4d5a13e587a2d3ee300c4f",
+      "bytes": 5200
+    },
+    "owners/3_4.png": {
+      "sha256": "2e33c89df96189a54313c015da630dbd8d185d72916faa6f28114282ead2edec",
+      "bytes": 1741
+    },
+    "owners/4_0.png": {
+      "sha256": "15ff50f84e191953f9a2d1995539e83ea71ba50493ad7c5d30e216419c3e5267",
+      "bytes": 5787
+    },
+    "owners/4_1.png": {
+      "sha256": "289741283f093cbc5a7bc7a152ef4538458f3efffa493a5a12d2115a4d0df217",
+      "bytes": 10315
+    },
+    "owners/4_2.png": {
+      "sha256": "0a925688a78bd6e0a2214ee70e7ae9d875da0aa323901b477a566e3d438dcc68",
+      "bytes": 4320
+    },
+    "owners/4_3.png": {
+      "sha256": "3816e0f7a2839927bb8c2bb3d0f61485c071532c722d4678ba2d76583dc649bd",
+      "bytes": 13574
+    },
+    "owners/4_4.png": {
+      "sha256": "f548a31becbc2a079cd93c00a11502637e81efda7bf8c0306460bdc3a186c182",
+      "bytes": 1573
+    },
+    "owners/5_0.png": {
+      "sha256": "0c6a005e9665cbf6f47b65c7bc9b67b8b8edbe0acf06757a3353dbcc8e342da2",
+      "bytes": 24968
+    },
+    "owners/5_1.png": {
+      "sha256": "830fb82a5bbf03b8f795be86ebb0e5dab4c2eb6aab983f673a8a1b9a1adfc3a7",
+      "bytes": 6765
+    },
+    "owners/5_2.png": {
+      "sha256": "e95ef9b1d5ee17ca7a63173fd6fb0cf30c1090936bdad8fd323779bb7b08f26f",
+      "bytes": 4305
+    },
+    "owners/5_3.png": {
+      "sha256": "4b33cf3f7d10c8bfc532e83c121dc4bb39535fe94a8978f07264be3b13d7fd04",
+      "bytes": 13475
+    },
+    "owners/5_4.png": {
+      "sha256": "b57772f6cb3c877c62aeba3da92d52613eeb365d3f3bc224c053a37149c1c7b8",
+      "bytes": 1764
+    },
+    "owners/6_0.png": {
+      "sha256": "a1c1b6dabacfe05ab72926c95b60bf3ee13326ba413f1aa48a962c913b2ca43c",
+      "bytes": 4667
+    },
+    "owners/6_1.png": {
+      "sha256": "40a9b6657cf23b7006784c095fa680a41b95ad3a8f0011a8465cb431209e51dd",
+      "bytes": 3935
+    },
+    "owners/6_2.png": {
+      "sha256": "752e33aebdefdbabfd5fd619ddf6f4b776acf6db1c4e769e0ea4698767177155",
+      "bytes": 5978
+    },
+    "owners/6_3.png": {
+      "sha256": "336e9bb272115e5211f13feac7914f871eb795742a1e2c170ff450d2a73cfe52",
+      "bytes": 8142
+    },
+    "owners/6_4.png": {
+      "sha256": "71188012771b5a97d2fb82d3e021c609144dcc41cd4b6394f7bdea7f3b0e018b",
+      "bytes": 1080
+    },
+    "owners/owners.json": {
+      "sha256": "04ec7fac1a9adaa83c782e3101b257b0952c9a20b984396fa5de4b8a8fe69196",
+      "bytes": 7319
+    },
+    "registration.bin": {
+      "sha256": "4d5f73d6fed0143d6b067b48e8d7938032b279affc51e79a3b660f406bd86702",
+      "bytes": 281520
+    },
+    "strokes.bin": {
+      "sha256": "33d11f275954abfd3aa5b5d86a2a526dc94a0540a90269f9cd6b61cadc8baf8a",
+      "bytes": 153100
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# `trunk build --release` from this directory writes dist/; serve.sh serves
+# it next to the bundle. Not `trunk serve`: the bundle must be served too.
+# Files keep their names (no content hash): fallback.html, which does not go
+# through trunk, links the stylesheet by name. A site that wants cache
+# busting adds it in site.sh.
+[build]
+target = "index.html"
+dist = "dist"
+filehash = false

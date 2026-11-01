@@ -1,0 +1,454 @@
+/* lmsheets inspector: the chrome's themes.
+ *
+ * One layout, two looks, each only tokens (docs/redraw-plan.md §5, Themes):
+ *  - "white" (White lab): white panels, hairlines, normal-case sans, one
+ *    blue accent, the sheet on paper.
+ *  - "hud" (HUD): near-black, cyan hairlines, monospace capitals, the sheet
+ *    dark too (the canvases follow; see lmsheets-inspector's Theme).
+ * The page follows prefers-color-scheme until the switch is used; the
+ * `data-theme` on <html> is set by the chrome. Fonts are vendored (SIL Open
+ * Font Licence) so the app runs with no network. */
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("fonts/JetBrainsMono[wght].ttf") format("truetype");
+  font-weight: 100 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/Inter[opsz,wght].ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root, :root[data-theme="white"] {
+  --bg: #f4f5f6;
+  --panel: #ffffff;
+  --line: #d9dde1;
+  --text: #20252a;
+  --muted: #7b848c;
+  --accent: #1f6feb;
+  --accent2: #d4572a;
+  --on-bg: #e8f0fd;
+  --red: #c4351f;
+  --font: "Inter", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --size: 13px;
+  --case: none;
+  --track: 0.01em;
+  --radius: 6px;
+  --nav-shadow: 0 2px 10px rgba(30, 40, 50, 0.16);
+  --stage: #e9ebed;
+  --float: rgba(255, 255, 255, 0.97);
+  --solid: #ffffff;
+}
+
+:root[data-theme="hud"] {
+  --bg: #070b10;
+  --panel: transparent;
+  --line: rgba(110, 220, 255, 0.28);
+  --text: #b9e8f5;
+  --muted: #5d8796;
+  --accent: #5fe0ff;
+  --accent2: #ffb454;
+  --on-bg: rgba(95, 224, 255, 0.12);
+  --red: #ff6a55;
+  --font: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --size: 12.5px;
+  --case: uppercase;
+  --track: 0.1em;
+  --radius: 0;
+  --nav-shadow: none;
+  --stage: #070b10;
+  --float: rgba(7, 11, 16, 0.985);
+  --solid: #070b10;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: var(--size) / 1.45 var(--font);
+  letter-spacing: var(--track);
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html, body { transition: background 0.2s, color 0.2s; }
+}
+
+button { font: inherit; letter-spacing: inherit; color: inherit; }
+
+/* The window: a bar, then the stage beside the layers panel, then the status
+ * line. */
+.shell {
+  display: grid;
+  grid-template-columns: 1fr 292px;
+  grid-template-rows: 44px 1fr 28px;
+  height: 100%;
+}
+
+.bar {
+  grid-column: 1 / 3;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  text-transform: var(--case);
+}
+.bar .spacer, .status .spacer { flex: 1; }
+
+.doc-title { color: var(--muted); }
+.doc-title b { font-weight: 400; }
+
+.group { display: flex; gap: 2px; }
+
+button {
+  background: none;
+  border: 1px solid transparent;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  text-transform: var(--case);
+}
+button:hover { color: var(--text); border-color: var(--line); }
+button.on { color: var(--accent); border-color: var(--line); background: var(--on-bg); }
+#theme { color: var(--text); border-color: var(--line); }
+#theme:hover { border-color: var(--accent); }
+
+.opacity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.opacity .n { min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+input[type="range"] {
+  width: 120px;
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+/* The stage holds the panes and the navigator. */
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--stage);
+}
+.panes {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+canvas.pane {
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+canvas.pane.hidden { display: none; }
+/* The split between two panes. */
+canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
+
+/* The navigator: the sheet in the corner, the view boxed. */
+.nav {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 3;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--nav-shadow);
+  background: var(--stage);
+  line-height: 0;
+}
+.nav canvas { display: block; touch-action: none; cursor: crosshair; }
+.nav-box {
+  position: absolute;
+  pointer-events: none;
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.fail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  color: var(--red);
+  font-family: var(--mono);
+}
+
+/* The layers panel. */
+.side {
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  overflow: auto;
+  padding: 14px 16px;
+  text-transform: var(--case);
+}
+.side h2 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.row { letter-spacing: 0.04em; }
+.row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.row.off { color: var(--muted); }
+.row.off .dot { opacity: 0.25; }
+.row.empty .name, .row.empty .n { opacity: 0.5; }
+.tog {
+  width: 22px; height: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  position: relative;
+  flex: none;
+}
+.tog::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 6px; height: 6px;
+  border-radius: 3px;
+  background: var(--muted);
+}
+.row:not(.off) .tog { border-color: var(--accent); }
+.row:not(.off) .tog::after { left: 12px; background: var(--accent); }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line); }
+
+/* The status line. */
+.status {
+  grid-column: 1 / 3;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 16px;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--panel);
+  text-transform: var(--case);
+}
+.status .k { margin-right: 6px; font-size: 10px; letter-spacing: 0.08em; }
+.status .v { color: var(--text); min-width: 7ch; display: inline-block; }
+.status span { white-space: nowrap; }
+.status .node { color: var(--accent2); }
+.status > span:first-child { flex: 1 1 0; min-width: 0; display: flex; }
+.status > span:first-child .v { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.status > span:not(:first-child) { flex: none; }
+.status .live { color: var(--accent); }
+.bench { color: var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* The constraints section of the side panel. */
+.side h2.section { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.side h3 {
+  margin: 10px 0 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* The detail drawer of the pinned item: about half the stage, from the
+ * right, with larger type and a card per section. The canvas beside it stays
+ * live. */
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  width: min(48%, 760px);
+  overflow: auto;
+  padding: 14px 18px 24px;
+  background: var(--float);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--nav-shadow);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.dhead { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; position: sticky; top: -14px; padding: 6px 0; background: var(--float); }
+.dtitle { flex: 1; color: var(--accent); font-weight: 600; font-size: 17px; overflow-wrap: anywhere; text-transform: var(--case); }
+.drawer .close { padding: 0 12px; font-size: 20px; line-height: 1.4; }
+.card { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 14px 10px; margin-bottom: 12px; background: color-mix(in srgb, var(--float) 70%, var(--bg)); }
+.card h3 { margin: 2px 0 6px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
+.drow { display: flex; gap: 14px; padding: 3px 0; align-items: baseline; }
+.drow .k { flex: none; width: 132px; color: var(--muted); font-size: 12px; text-transform: var(--case); }
+.drow .v { flex: 1; min-width: 0; overflow-wrap: anywhere; word-break: break-word; font-family: var(--mono); font-size: 13px; text-transform: none; }
+.drawer a { color: var(--accent); cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.drawer a:hover { text-decoration-color: var(--accent); }
+
+/* The Details chip in the status bar. */
+.chip { padding: 1px 10px; font-size: 11px; color: var(--accent); border-color: var(--accent); }
+.chip.on { background: var(--on-bg); }
+
+/* Disclosures in the side panel. */
+.side details { margin-top: 6px; }
+.side summary { cursor: pointer; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 0; user-select: none; }
+.side details[open] > summary { color: var(--text); }
+.side .row.plain { cursor: default; }
+.side .hint { color: var(--muted); font-size: 11.5px; margin: 2px 0 6px; text-transform: none; }
+
+/* ---- About, the scrim, and the mobile layout (chunk 24a) ---- */
+
+.mobile-only { display: none !important; }
+.scrim { display: none; position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.38); }
+.scrim.on { display: block; }
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 30;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(86vh, 900px);
+  overflow: auto;
+  padding: 18px 22px 22px;
+  background: var(--solid);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--nav-shadow);
+  font-size: 14px;
+  line-height: 1.55;
+  text-transform: none;
+}
+.modal.on { display: block; }
+.modal .close { position: sticky; float: right; top: 0; padding: 0 12px; font-size: 22px; line-height: 1.4; }
+.about-body h2 { margin: 0 0 10px; font-size: 18px; color: var(--accent); text-transform: var(--case); }
+.about-body h3 { margin: 18px 0 6px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
+.about-body p { margin: 0 0 10px; }
+.about-body ul { margin: 0 0 10px; padding-left: 20px; }
+.about-body li { margin-bottom: 4px; }
+.about-body a { color: var(--accent); }
+
+/* The wipe: both panes the size of the stage, the redraw on top, clipped at
+ * the divider (inline clip-path from the shell). */
+.panes.wipe { display: block; }
+.panes.wipe canvas.pane { position: absolute; left: 0; top: 0; border-left: none; }
+.wipe-handle {
+  position: absolute; top: 0; bottom: 0; z-index: 3;
+  width: 44px; margin-left: -22px;
+  cursor: ew-resize; touch-action: none;
+}
+.wipe-handle::before {
+  content: ""; position: absolute; left: 21px; top: 0; bottom: 0; width: 2px;
+  background: var(--accent);
+}
+.wipe-knob {
+  position: absolute; left: 4px; top: 50%; width: 36px; height: 36px; margin-top: -18px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 2px solid var(--accent);
+  background: var(--float); color: var(--accent); font-size: 18px; line-height: 1;
+}
+
+/* The mobile layout: one pane at a time, the bar's switch, a bottom sheet for
+ * the pinned item and a menu sheet for everything else. */
+.shell[data-layout="mobile"] {
+  display: block;
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  font-size: 14px;
+}
+.shell[data-layout="mobile"] .desktop-only,
+.shell[data-layout="mobile"] #mode-side,
+.shell[data-layout="mobile"] .status { display: none !important; }
+.shell[data-layout="mobile"] .mobile-only { display: flex !important; }
+.shell[data-layout="mobile"] .bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 48px; z-index: 5;
+  padding: 0 8px; gap: 6px;
+  padding-top: env(safe-area-inset-top);
+}
+.shell[data-layout="mobile"] .shell[data-layout="mobile"] .doc-title { display: none; }
+.shell[data-layout="mobile"] .group button { padding: 8px 9px; min-height: 36px; }
+.shell[data-layout="mobile"] #menu { padding: 8px 10px; min-height: 36px; display: inline-flex !important; }
+.shell[data-layout="mobile"] .opacity {
+  position: absolute; top: 52px; left: 8px; right: 8px; z-index: 4;
+  padding: 6px 12px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--float);
+}
+.shell[data-layout="mobile"] .opacity input { flex: 1; width: auto; }
+.shell[data-layout="mobile"] .stage { position: absolute; inset: 48px 0 0 0; }
+.shell[data-layout="mobile"] canvas.pane { cursor: default; }
+.shell[data-layout="mobile"] .nav { bottom: auto; top: 10px; right: 10px; }
+
+/* The bottom sheet of the pinned item. */
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+  display: flex; flex-direction: column;
+  max-height: 100%;
+  background: var(--solid);
+  border-top: 1px solid var(--line);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.22);
+  padding-bottom: env(safe-area-inset-bottom);
+  text-transform: none;
+}
+.sheet.half { height: 52%; }
+.sheet.full { height: 100%; border-radius: 0; }
+.sheet .grip { flex: none; height: 22px; display: flex; justify-content: center; align-items: center; touch-action: none; cursor: grab; }
+.sheet .grip-bar { width: 44px; height: 5px; border-radius: 3px; background: var(--line); }
+.sheet .peek { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 8px 8px 16px; min-height: 40px; }
+.sheet .sum { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); font-weight: 600; }
+.sheet .close { padding: 2px 12px; font-size: 22px; line-height: 1.3; min-height: 36px; }
+.sheet-body { flex: 1; overflow: auto; padding: 4px 14px 24px; font-size: 14px; line-height: 1.5; }
+.sheet-body .drow { flex-wrap: wrap; gap: 4px 12px; }
+.sheet-body .drow .k { width: auto; min-width: 110px; }
+.sheet-body a { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+/* The menu sheet: the side panel as a sheet from the bottom. */
+.shell[data-layout="mobile"] .side {
+  display: none;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  max-height: 78%;
+  border-left: none; border-top: 1px solid var(--line);
+  border-radius: 12px 12px 0 0;
+  background: var(--solid);
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.3);
+}
+.shell[data-layout="mobile"] .side.open { display: block; }
+.shell[data-layout="mobile"] .row { padding: 9px 0; }
+.shell[data-layout="mobile"] .side summary { padding: 9px 0; }
+.menu-head { align-items: center; justify-content: space-between; padding: 4px 0 8px; color: var(--accent); }
+.menu-actions { gap: 8px; padding-bottom: 8px; }
+.menu-actions button { flex: 1; border-color: var(--line); color: var(--text); padding: 10px 12px; }
+.shell[data-layout="mobile"] .modal { width: calc(100vw - 20px); max-height: 88dvh; }
+.shell[data-layout="desktop"] #mode-wipe { display: none; }
+.shell[data-layout="mobile"] .shell[data-layout="mobile"] .bar { letter-spacing: 0.02em; font-size: 12px; }
+.shell[data-layout="mobile"] .spacer { display: none; }
+.shell[data-layout="mobile"] .group { flex: 1; }
+.shell[data-layout="mobile"] .group button { flex: 1; padding: 8px 4px; }
+.sheet-head { flex: none; touch-action: none; cursor: grab; }

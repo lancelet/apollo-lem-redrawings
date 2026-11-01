@@ -1,0 +1,27 @@
+[package]
+name = "lmsheets-gpu"
+license = "MIT OR Apache-2.0"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+lmsheets-document = { path = "../document" }
+lmsheets-render = { path = "../render" }
+wgpu = { version = "=30.0.1", default-features = false, features = ["wgsl", "std"] }
+bytemuck = { version = "1", features = ["derive"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+image = { version = "0.25", default-features = false, features = ["webp"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wgpu = { version = "=30.0.1", default-features = false, features = ["webgpu", "wgsl", "std"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+wgpu = { version = "=30.0.1", default-features = false, features = ["metal", "dx12", "wgsl", "std"] }
+
+[dev-dependencies]
+winit = "0.30"
+pollster = "0.4"
+image = { version = "0.25", default-features = false, features = ["webp", "png"] }
+lmsheets-inspector = { path = "../inspector" }

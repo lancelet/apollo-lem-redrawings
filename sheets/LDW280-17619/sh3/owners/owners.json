@@ -1,0 +1,408 @@
+{
+  "paper": 0,
+  "index": "a pixel value v > 0 is nodes[v - 1]; 0 is paper or ink no node claims",
+  "rule": "where several nodes claim a pixel, the lowest node index",
+  "ambiguous_px": 7863,
+  "nodes": [
+    {
+      "kind": "marking_region",
+      "name": "marking_ee097332d5a8c"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.1"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.2"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.3"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.4"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.5"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.6"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.7"
+    },
+    {
+      "kind": "entity",
+      "name": "part/e931c6c955cd1.8"
+    },
+    {
+      "kind": "observed",
+      "name": "rounding_E45.1_E45.2"
+    },
+    {
+      "kind": "observed",
+      "name": "rounding_E45.5_E45.4"
+    },
+    {
+      "kind": "observed",
+      "name": "rounding_E45.6_E45.5"
+    },
+    {
+      "kind": "observed",
+      "name": "rounding_E45.8_E45.1"
+    },
+    {
+      "kind": "dimension",
+      "name": "D1"
+    },
+    {
+      "kind": "dimension",
+      "name": "D2"
+    },
+    {
+      "kind": "dimension",
+      "name": "D3"
+    },
+    {
+      "kind": "dimension",
+      "name": "D4"
+    },
+    {
+      "kind": "dimension",
+      "name": "D5"
+    },
+    {
+      "kind": "dimension",
+      "name": "R1"
+    },
+    {
+      "kind": "witness",
+      "name": "D1,D4"
+    },
+    {
+      "kind": "witness",
+      "name": "D2,D5"
+    },
+    {
+      "kind": "witness",
+      "name": "D2"
+    },
+    {
+      "kind": "witness",
+      "name": "D3,D5"
+    },
+    {
+      "kind": "witness",
+      "name": "D3"
+    },
+    {
+      "kind": "witness",
+      "name": "D4"
+    },
+    {
+      "kind": "centre_line",
+      "name": "CL1"
+    },
+    {
+      "kind": "centre_line",
+      "name": "CL2"
+    },
+    {
+      "kind": "centre_line",
+      "name": "CL3"
+    },
+    {
+      "kind": "centre_line",
+      "name": "CL4"
+    },
+    {
+      "kind": "form",
+      "name": "frame/0"
+    },
+    {
+      "kind": "form",
+      "name": "frame/1"
+    },
+    {
+      "kind": "form",
+      "name": "frame/2"
+    },
+    {
+      "kind": "form",
+      "name": "frame/3"
+    },
+    {
+      "kind": "form",
+      "name": "arrow/0"
+    },
+    {
+      "kind": "form",
+      "name": "arrow/1"
+    },
+    {
+      "kind": "form",
+      "name": "arrow/2"
+    },
+    {
+      "kind": "form",
+      "name": "arrow/3"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/0"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/1"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/2"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/3"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/4"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/5"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/6"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/7"
+    },
+    {
+      "kind": "form",
+      "name": "rule/0/8"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/0"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/1"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/2"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/3"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/4"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/5"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/6"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/7"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/8"
+    },
+    {
+      "kind": "form",
+      "name": "rule/1/9"
+    },
+    {
+      "kind": "text",
+      "name": "xd5a5b011e167"
+    },
+    {
+      "kind": "text",
+      "name": "xd74333b1182d"
+    },
+    {
+      "kind": "field",
+      "name": "check"
+    },
+    {
+      "kind": "field",
+      "name": "code_ident"
+    },
+    {
+      "kind": "field",
+      "name": "drawing_number"
+    },
+    {
+      "kind": "field",
+      "name": "scale"
+    },
+    {
+      "kind": "field",
+      "name": "sheet"
+    },
+    {
+      "kind": "field",
+      "name": "size"
+    },
+    {
+      "kind": "form",
+      "name": "label/0/0"
+    },
+    {
+      "kind": "form",
+      "name": "label/0/1"
+    },
+    {
+      "kind": "form",
+      "name": "label/0/4"
+    },
+    {
+      "kind": "form",
+      "name": "label/0/6"
+    },
+    {
+      "kind": "form",
+      "name": "printed/0/0"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/0"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/1"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/2"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/3"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/4"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/5"
+    },
+    {
+      "kind": "form",
+      "name": "printed/1/6"
+    },
+    {
+      "kind": "form",
+      "name": "printed/2/0"
+    },
+    {
+      "kind": "noise",
+      "name": "a small mark"
+    },
+    {
+      "kind": "noise",
+      "name": "dirt specks in blank paper"
+    },
+    {
+      "kind": "foreign",
+      "name": "archive handwriting by the right border"
+    },
+    {
+      "kind": "foreign",
+      "name": "NAS 9-1100 stamp"
+    },
+    {
+      "kind": "foreign",
+      "name": "outside the drawing"
+    },
+    {
+      "kind": "pencil",
+      "name": "vertical axis through the marking box, above it"
+    },
+    {
+      "kind": "pencil",
+      "name": "horizontal axis, left of the marking box"
+    },
+    {
+      "kind": "pencil",
+      "name": "horizontal axis, right of the marking box"
+    },
+    {
+      "kind": "pencil",
+      "name": "horizontal axis run on past the inked centre line, far left"
+    },
+    {
+      "kind": "pencil",
+      "name": "horizontal axis between the 5/16 bar and the inked centre-line dash"
+    },
+    {
+      "kind": "pencil",
+      "name": "horizontal axis run on past the inked centre line, far right"
+    },
+    {
+      "kind": "pencil",
+      "name": "1 3/4 left extension line run on above the dimension line"
+    },
+    {
+      "kind": "pencil",
+      "name": "1 3/4 right extension line run on above the dimension line"
+    },
+    {
+      "kind": "pencil",
+      "name": "1 3/4 left extension line run on below the left end"
+    },
+    {
+      "kind": "pencil",
+      "name": "1 3/4 right extension line run on below the right end"
+    },
+    {
+      "kind": "pencil",
+      "name": "5/8 lower extension line run on to the left"
+    },
+    {
+      "kind": "pencil",
+      "name": "vertical axis through the marking box, below it"
+    },
+    {
+      "kind": "pencil",
+      "name": "vertical axis through the marking box, below the outline"
+    },
+    {
+      "kind": "pencil",
+      "name": "top flat's line run on to the right"
+    },
+    {
+      "kind": "dimension",
+      "name": "inferred_horizontal_distance_E68.start_E69.start"
+    },
+    {
+      "kind": "dimension",
+      "name": "inferred_vertical_distance_E68.start_E68.end"
+    },
+    {
+      "kind": "witness",
+      "name": "inferred_horizontal_distance_E68.start_E69.start"
+    },
+    {
+      "kind": "witness",
+      "name": "inferred_vertical_distance_E68.start_E68.end"
+    }
+  ]
+}

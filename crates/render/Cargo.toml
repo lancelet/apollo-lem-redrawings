@@ -1,0 +1,10 @@
+[package]
+name = "lmsheets-render"
+license = "MIT OR Apache-2.0"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+lmsheets-document = { path = "../document" }
+lmsheets-font = { path = "../font" }

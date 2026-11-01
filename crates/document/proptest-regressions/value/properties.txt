@@ -1,0 +1,8 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc a719fb7b2453e0a8bb7988f6c96f785afb729b4c5b7d243fe476595429c1f5e8 # shrinks to a = -3.1415926535897936
+cc 3c685922f604bb36756a1199d4d43060c8dc91a0ca399789c24e5c9a9ecc0c84 # shrinks to e = Arc { centre: P2 { x: 0.0, y: 0.0, frame: PhantomData<lmsheets_document::value::geometry::Model> }, radius: 1.0, start_angle: -3.1415926535897936, sweep: 3.141592653589793 }

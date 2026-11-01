@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/document",
+    "crates/font",
+    "crates/render",
+    "crates/gpu",
+    "crates/inspector",
+    "crates/inspect-web",
+]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.85"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+
+# Tests run in the dev profile; the maths crates are far too slow without
+# optimisation, while our own crates stay unoptimised for compile speed.
+[profile.dev.package."*"]
+opt-level = 2

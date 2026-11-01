@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" data-theme="white">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apollo LEM redrawings</title>
+<link rel="icon" href="data:,">
+<script>
+  // The look before the page is up: the system's scheme.
+  if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "hud";
+  // No WebGPU: the static page, without loading the viewer. (?nogpu=1 pretends.)
+  if (!navigator.gpu || /[?&]nogpu\b/.test(location.search)) {
+    location.replace("fallback.html?reason=" + encodeURIComponent("WebGPU is not available in this browser."));
+  }
+</script>
+<link data-trunk rel="css" href="theme.css">
+<link data-trunk rel="copy-file" href="fallback.html">
+<link data-trunk rel="copy-file" href="about.html">
+<link data-trunk rel="copy-dir" href="fonts">
+<link data-trunk rel="rust" data-bindgen-target="web" />
+</head>
+<body></body>
+</html>

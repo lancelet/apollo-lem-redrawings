@@ -1,0 +1,9 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc b01a30dd34353346013e5a7a8691566d34377f2aaa0f9ab526ee138576453753 # shrinks to (e, x) = (Equation(OnLine { p: PointRef(Point { id: EntityId(u!("p")) }), l: LineRef(EntityId(u!("l"))) }), VecStorage { data: [0.0, 0.0, 1.0, 0.0, 3.141592653589793, 0.0, 0.0, 1.0, 0.0, 3.141592653589793, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 6.253043655585608, 0.0, 6.253043655585609, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.379565483378412, -6.253043655585607, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], nrows: Dyn(40), ncols: Const })
+cc fa1cb5c85dbbd3ab1cd6a7bb294a9d45ff983ae1f0b81a77a1033cb1dc710a84 # shrinks to (e, x) = (Equation(Same { a: PointRef(Point { id: EntityId(u!("q")) }), ax: Y, b: PointRef(Arc { id: EntityId(u!("a")), at: Mid }), bx: X }), VecStorage { data: [5.343121631839792, 0.0, 3.0, -1.5672278276890101, 3.141592653589793, 0.0, 0.0, 1.0, 0.0, 3.141592653589793, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.3538271064365, -3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], nrows: Dyn(40), ncols: Const })
+cc e6b3a8162c4e847987f846d601d8803542cc30dc1f7d59a8ed6e889be2098167 # shrinks to (e, x) = (Equation(Coincide { a: PointRef(Point { id: EntityId(u!("p")) }), b: PointRef(Point { id: EntityId(u!("q")) }) }), VecStorage { data: [0.0, 0.0, 1.0, 0.0, 3.141592653589793, 0.0, 0.0, 1.0, 0.0, 3.141592653589793, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, -3.0, 1.0, -3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], nrows: Dyn(40), ncols: Const })

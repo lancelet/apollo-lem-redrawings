@@ -1,0 +1,17 @@
+[package]
+name = "lmsheets-inspector"
+license = "MIT OR Apache-2.0"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+
+# Framework-free and data-only: no wgpu, winit or Leptos. The Leptos chrome
+# and the native harness both drive it (docs/redraw-plan.md §5).
+[dependencies]
+lmsheets-document = { path = "../document" }
+lmsheets-render = { path = "../render" }
+png = { version = "0.18", default-features = false }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]

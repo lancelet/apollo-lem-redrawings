@@ -1,0 +1,33 @@
+[package]
+name = "lmsheets-document"
+license = "MIT OR Apache-2.0"
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+approx = "0.5"
+faer = { version = "0.24.4", default-features = false, features = ["std", "linalg"] }
+levenberg-marquardt = "0.14"
+lmsheets-font = { path = "../font" }
+nalgebra = "0.33.3"
+num-dual = "0.11.2"
+proptest = { version = "1.11.0", optional = true }
+serde.workspace = true
+serde_json.workspace = true
+serde_path_to_error = "0.1.20"
+ustr = { version = "1.1.0", features = ["serde"] }
+
+[features]
+# The proptest strategies of `lmsheets_document::testing`, for other
+# crates' tests: `lmsheets-document = { ..., features = ["testing"] }`
+# under their dev-dependencies.
+testing = ["dep:proptest"]
+
+[dev-dependencies]
+criterion = "0.7.0"
+proptest = "1.11.0"
+
+[[bench]]
+name = "solver"
+harness = false
