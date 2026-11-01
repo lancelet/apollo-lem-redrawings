@@ -50,25 +50,29 @@
       if (!/\.wasm([?#]|$)/.test(url)) return result;
       return result.then(function (r) {
         if (!r.ok) { failed("HTTP " + r.status); return r; }
-        if (!r.body) return r;
-        var length = +r.headers.get("content-length") || 0;
-        var total = r.headers.get("content-encoding") ? WASM_BYTES : (length || WASM_BYTES);
-        var got = 0;
-        var reader = r.body.getReader();
-        show("Downloading the viewer", 0, total);
-        var body = new ReadableStream({
-          pull: function (c) {
-            return reader.read().then(function (x) {
-              if (x.done) { show("Loading the sheet\u2026"); c.close(); return; }
+        // The loader gets the response untouched; a clone is read to count
+        // the bytes. (A response rebuilt around a counting stream kept the
+        // compressed Content-Length over the decoded body, which WebKit
+        // refuses: "TypeError: Load failed".) Counting is best effort: if
+        // it fails, the bar stops and the viewer still loads.
+        try {
+          var length = +r.headers.get("content-length") || 0;
+          var total = r.headers.get("content-encoding") ? WASM_BYTES : (length || WASM_BYTES);
+          var got = 0;
+          var reader = r.clone().body.getReader();
+          show("Downloading the viewer", 0, total);
+          var step = function () {
+            reader.read().then(function (x) {
+              if (x.done) { show("Loading the sheet\u2026"); return; }
               got += x.value.length;
               show("Downloading the viewer", got, total);
-              c.enqueue(x.value);
-            }, function (e) { failed(String(e)); c.error(e); });
-          },
-          cancel: function (why) { return reader.cancel(why); }
-        });
-        return new Response(body, { status: r.status, statusText: r.statusText, headers: r.headers });
-      }, function (e) { failed(String(e)); throw e; });
+              step();
+            }, function () {});
+          };
+          step();
+        } catch (e) {}
+        return r;
+      }, function (e) { failed("fetching the viewer: " + e); throw e; });
     };
   })();
 </script>
