@@ -383,7 +383,8 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
   font-size: 14px;
 }
 .shell[data-layout="mobile"] .desktop-only,
-.shell[data-layout="mobile"] #mode-side,
+.shell[data-layout="mobile"] #mode-redraw,
+.shell[data-layout="mobile"] #mode-scan,
 .shell[data-layout="mobile"] .status { display: none !important; }
 .shell[data-layout="mobile"] .mobile-only { display: flex !important; }
 .shell[data-layout="mobile"] .bar {
@@ -454,3 +455,13 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
 .sheet-head { flex: none; touch-action: none; cursor: grab; }
 
 .doc-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+
+/* Compare on a phone: stacked in a portrait window, the redraw above the scan,
+ * a thin divider between; abreast in landscape. The sheet of a pin covers the
+ * lower (or right) pane only, and only its summary line at first. */
+.panes.stacked { flex-direction: column; }
+.panes.stacked canvas.pane + canvas.pane { border-left: none; border-top: 1px solid var(--line); }
+.shell[data-layout="mobile"][data-split="abreast"] .sheet { left: 50%; }
+.shell[data-layout="mobile"] .sheet .grip { height: 16px; }
+.shell[data-layout="mobile"] .sheet .peek { min-height: 32px; padding-bottom: 4px; }
+.shell[data-layout="mobile"] .sheet .close { min-height: 30px; padding-top: 0; padding-bottom: 0; }

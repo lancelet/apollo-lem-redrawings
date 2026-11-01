@@ -1020,14 +1020,16 @@ fn the_mobile_layout_has_one_pane_and_no_navigator() {
     assert_eq!(m.mode(), Mode::SideBySide);
     update(&mut m, Msg::SetLayout(Layout::Mobile));
     assert_eq!(m.layout(), Layout::Mobile);
-    // Side by side becomes the redraw alone; the navigator is off.
-    assert_eq!(m.mode(), Mode::RedrawOnly);
+    // Compare (side by side) stays, stacked in this portrait window; the
+    // navigator is off.
+    assert_eq!(m.mode(), Mode::SideBySide);
     assert!(!m.navigator());
+    assert!(m.stacked());
+    assert_eq!(m.pane_size(Pane::Redraw), Some((390, 422)));
+    assert_eq!(m.pane_size(Pane::Scan), Some((390, 422)));
+    update(&mut m, Msg::SetMode(Mode::RedrawOnly));
     assert_eq!(m.pane_size(Pane::Redraw), Some((390, 844)));
     assert_eq!(m.pane_size(Pane::Scan), None);
-    // It cannot be asked for back, but the navigator can be.
-    update(&mut m, Msg::SetMode(Mode::SideBySide));
-    assert_eq!(m.mode(), Mode::RedrawOnly);
     update(&mut m, Msg::SetNavigator(true));
     assert!(m.navigator());
     update(&mut m, Msg::SetMode(Mode::Overlay));
@@ -1163,4 +1165,92 @@ fn the_mobile_messages_replay_and_round_trip() {
     assert_eq!(run(&log), run(&back));
     let m = run(&log);
     assert_eq!((m.mode(), m.wipe(), m.navigator()), (Mode::Wipe, 0.3, true));
+}
+
+#[test]
+fn compare_stacks_in_portrait_and_rotation_keeps_the_view() {
+    use lmsheets_inspector::Layout;
+    let mut m = Model::new(chain(), (390, 844));
+    // The desktop never stacks.
+    assert!(!m.stacked());
+    assert_eq!(m.pane_size(Pane::Scan), Some((195, 844)));
+    update(&mut m, Msg::SetLayout(Layout::Mobile));
+    update(&mut m, Msg::Fit);
+    assert!(m.stacked());
+    assert_eq!(m.pane_origin(Pane::Redraw), Some((0, 0)));
+    assert_eq!(m.pane_origin(Pane::Scan), Some((0, 422)));
+    assert_eq!(m.pane_at((10.0, 421.0)), Some(Pane::Redraw));
+    assert_eq!(m.pane_at((10.0, 422.0)), Some(Pane::Scan));
+    // Pan and zoom in either pane move both (one view in paper).
+    update(
+        &mut m,
+        Msg::Pan {
+            pane: Pane::Scan,
+            by: (20.0, -10.0),
+        },
+    );
+    update(
+        &mut m,
+        Msg::Zoom {
+            pane: Pane::Redraw,
+            factor: 2.0,
+            about: (100.0, 100.0),
+        },
+    );
+    let (centre, scale) = (m.centre(), m.scale());
+    // Rotate: the panes go side by side, the view's centre and scale stay.
+    update(
+        &mut m,
+        Msg::Resize {
+            width: 844,
+            height: 390,
+        },
+    );
+    assert!(!m.stacked());
+    assert_eq!(m.pane_size(Pane::Redraw), Some((422, 390)));
+    assert_eq!(m.pane_origin(Pane::Scan), Some((422, 0)));
+    assert_eq!(m.pane_at((421.0, 10.0)), Some(Pane::Redraw));
+    assert_eq!(m.pane_at((422.0, 10.0)), Some(Pane::Scan));
+    assert_eq!((m.centre(), m.scale()), (centre, scale));
+    // The scan camera still follows the paper centre through the chain.
+    let cam = m.scan_camera().unwrap();
+    let mid = (
+        cam.origin.0 + cam.size.0 as f64 / cam.zoom / 2.0,
+        cam.origin.1 + cam.size.1 as f64 / cam.zoom / 2.0,
+    );
+    let want = m.chain().paper_to_scan(centre);
+    assert!((mid.0 - want.0).abs() < 1e-6 && (mid.1 - want.1).abs() < 1e-6);
+    // And back; a recorded log with the rotations replays to the same model.
+    update(
+        &mut m,
+        Msg::Resize {
+            width: 390,
+            height: 844,
+        },
+    );
+    assert!(m.stacked() && (m.centre(), m.scale()) == (centre, scale));
+    let log = vec![
+        Msg::SetLayout(Layout::Mobile),
+        Msg::Resize {
+            width: 844,
+            height: 390,
+        },
+        Msg::Pan {
+            pane: Pane::Redraw,
+            by: (5.0, 5.0),
+        },
+        Msg::Resize {
+            width: 390,
+            height: 844,
+        },
+    ];
+    let run = |l: &[Msg]| {
+        let mut m = Model::new(chain(), (390, 844));
+        for x in l {
+            update(&mut m, x.clone());
+        }
+        m
+    };
+    assert_eq!(run(&log), run(&log));
+    assert!(run(&log).stacked());
 }

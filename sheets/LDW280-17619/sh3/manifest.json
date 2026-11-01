@@ -167,11 +167,6 @@
     "size": 394581,
     "note": "the full scan, as archived; not in this bundle"
   },
-  "fallback": {
-    "redraw": "fallback/redraw.png",
-    "scan": "fallback/scan.png",
-    "note": "for a browser without WebGPU: the redraw on its paper, the scan's coarsest level"
-  },
   "full_scan_in_bundle": false,
   "full_scan_note": "cropped; fetch the original by its url and hash to line it up with the crop offset",
   "rights": {
@@ -317,14 +312,6 @@
     "document.json": {
       "sha256": "6b55bbcbf2077711186cf96978e759bdd602cc60c59c0a719acfb6abba31563b",
       "bytes": 1785179
-    },
-    "fallback/redraw.png": {
-      "sha256": "e8478cadd2a53fcbe6288d03740da5d2e38dd4ea0867882a93cca176b1f11e4d",
-      "bytes": 96257
-    },
-    "fallback/scan.png": {
-      "sha256": "787a2fe192f090f8d297e15050f8353efb18d62a08a9b7533ac3f8c47ef31ae8",
-      "bytes": 78105
     },
     "forms/ENG-73.1_6-64.json": {
       "sha256": "00af243bf7d0ca788b51a4a204626c63678ce3dd2bd3db7a4142b9da08914654",

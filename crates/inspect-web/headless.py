@@ -14,7 +14,7 @@ the count and bytes of those that are), for the static site's check.
 
 Touch steps (they need `--touch`): `tap:X,Y`, `swipe:X0,Y0,X1,Y1`,
 `pinch:X,Y,D0,D1` (two fingers D0 apart spreading to D1 about X,Y) and
-`hold:X,Y,MS` (a finger down and still).
+`flick:X0,Y0,X1,Y1` (a fast swipe that returns at once after the lift, to watch momentum), `hold:X,Y,MS` (a finger down and still); `viewport:W,H` resizes the viewport\n(a rotation).
 
 `--script` runs after the load, step by step: `wheel` sends a wheel event at
 a page point (`ctrl` makes it a pinch), `hover` moves the pointer (`alt`
@@ -220,6 +220,15 @@ def main():
                         time.sleep(0.02)
                     call("Input.dispatchTouchEvent", type="touchEnd", touchPoints=[])
                     time.sleep(0.6)
+                elif op == "flick":
+                    # A quick swipe that returns at once after the lift, to watch the momentum.
+                    x0, y0, x1, y1 = [float(v) for v in f[:4]]
+                    call("Input.dispatchTouchEvent", type="touchStart", touchPoints=[{"x": x0, "y": y0, "id": 1}])
+                    for k in range(1, 9):
+                        call("Input.dispatchTouchEvent", type="touchMove", touchPoints=[
+                            {"x": x0 + (x1 - x0) * k / 8, "y": y0 + (y1 - y0) * k / 8, "id": 1}])
+                        time.sleep(0.01)
+                    call("Input.dispatchTouchEvent", type="touchEnd", touchPoints=[])
                 elif op == "pinch":
                     cx, cy, d0, d1 = [float(v) for v in f[:4]]
                     two = lambda d: [{"x": cx - d / 2, "y": cy, "id": 1}, {"x": cx + d / 2, "y": cy, "id": 2}]
@@ -235,6 +244,11 @@ def main():
                     time.sleep(float(f[2]) / 1000.0)
                     call("Input.dispatchTouchEvent", type="touchEnd", touchPoints=[])
                     time.sleep(0.6)
+                elif op == "viewport":
+                    # A rotation: the viewport changes size, as the phone turns.
+                    call("Emulation.setDeviceMetricsOverride", width=int(f[0]), height=int(f[1]),
+                         deviceScaleFactor=dpr, mobile=touch)
+                    time.sleep(1.0)
                 elif op == "shot":
                     shot = call("Page.captureScreenshot", format="png")
                     open(os.path.join(outdir, arg + ".png"), "wb").write(base64.b64decode(shot["data"]))

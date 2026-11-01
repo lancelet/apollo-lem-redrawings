@@ -169,6 +169,70 @@ const TAP_MS: f64 = 450.0;
 /// A finger held still this long is a long press, ms.
 const LONG_MS: f64 = 500.0;
 
+/// The window over which a drag's speed is read at release, ms.
+const VELOCITY_WINDOW_MS: f64 = 100.0;
+/// A finger that rested this long before lifting leaves no momentum, ms.
+const REST_MS: f64 = 60.0;
+/// A fling's pan speed decays by this much per ms (UIScrollView's normal
+/// deceleration rate, 0.998 per ms: the distance travelled is `v * 500 ms`).
+const PAN_DECAY: f64 = 0.998;
+/// The pinch's zoom rate decays faster, so its inertia is short.
+const ZOOM_DECAY: f64 = 0.99;
+/// A fling stops below this speed, px per ms.
+const MIN_SPEED: f64 = 0.02;
+/// And a zoom fling below this rate of `ln(factor)` per ms.
+const MIN_ZOOM_RATE: f64 = 1e-4;
+
+/// Momentum after a drag or a pinch: the pan speed (CSS px per ms) and the
+/// zoom rate (`ln(factor)` per ms, about a point) the fingers left with,
+/// decaying until they stop. Driven a frame at a time by [`Fling::step`].
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Fling {
+    /// Pan speed, px per ms.
+    pub vel: (f64, f64),
+    /// Zoom rate, `ln(factor)` per ms.
+    pub zoom_rate: f64,
+    /// The fixed point of the zoom.
+    pub about: (f64, f64),
+}
+
+impl Fling {
+    /// The integral of a decay `k` per ms over `dt`: the time that stands
+    /// for the motion (`(1 - k^dt) / -ln k`), and what is left (`k^dt`).
+    fn over(k: f64, dt: f64) -> (f64, f64) {
+        let left = k.powf(dt);
+        ((1.0 - left) / -k.ln(), left)
+    }
+
+    /// Advance `dt` ms: the pan to make (CSS px), the zoom factor, and the
+    /// speeds decayed. A speed under its floor is zero from then on.
+    pub fn step(&mut self, dt: f64) -> ((f64, f64), f64) {
+        let (reach, left) = Self::over(PAN_DECAY, dt);
+        let pan = (self.vel.0 * reach, self.vel.1 * reach);
+        self.vel = (self.vel.0 * left, self.vel.1 * left);
+        if self.vel.0.hypot(self.vel.1) < MIN_SPEED {
+            self.vel = (0.0, 0.0);
+        }
+        let (zreach, zleft) = Self::over(ZOOM_DECAY, dt);
+        let factor = (self.zoom_rate * zreach).exp();
+        self.zoom_rate *= zleft;
+        if self.zoom_rate.abs() < MIN_ZOOM_RATE {
+            self.zoom_rate = 0.0;
+        }
+        (pan, factor)
+    }
+
+    /// Whether it has stopped.
+    pub fn done(&self) -> bool {
+        self.vel == (0.0, 0.0) && self.zoom_rate == 0.0
+    }
+
+    /// The fling to run, or none for a user who asks for reduced motion.
+    pub fn for_motion(self, reduced_motion: bool) -> Option<Fling> {
+        (!reduced_motion).then_some(self)
+    }
+}
+
 /// What touch input asks of the view. Positions are CSS px in the pane.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TouchAction {
@@ -185,6 +249,8 @@ pub enum TouchAction {
     Tap((f64, f64)),
     /// A touch held still.
     LongPress((f64, f64)),
+    /// The fingers lifted while moving: momentum to carry on with.
+    Fling(Fling),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -205,6 +271,9 @@ pub struct Touches {
     /// it can no longer be a tap or a long press.
     moved: bool,
     long_fired: bool,
+    /// The recent moves of this gesture, for the speed at release: time,
+    /// the fingers' centre and (with two) their spread.
+    track: Vec<(f64, (f64, f64), Option<f64>)>,
 }
 
 fn centre(f: &[Finger]) -> (f64, f64) {
@@ -228,6 +297,7 @@ impl Touches {
         } else {
             self.moved = true;
         }
+        self.track.clear();
         self.fingers.retain(|f| f.id != id);
         self.fingers.push(Finger {
             id,
@@ -244,7 +314,7 @@ impl Touches {
     }
 
     /// A finger moved to `at`.
-    pub fn moved(&mut self, id: i32, at: (f64, f64)) -> Vec<TouchAction> {
+    pub fn moved(&mut self, id: i32, at: (f64, f64), t: f64) -> Vec<TouchAction> {
         let Some(i) = self.fingers.iter().position(|f| f.id == id) else {
             return Vec::new();
         };
@@ -282,7 +352,62 @@ impl Touches {
             }
             _ => {}
         }
+        if self.moved && !out.is_empty() {
+            let spread = (self.fingers.len() == 2).then(|| spread(&self.fingers));
+            self.track.push((t, centre(&self.fingers), spread));
+            if self.track.len() > 16 {
+                self.track.remove(0);
+            }
+        }
         out
+    }
+
+    /// The momentum the gesture leaves with if the fingers lift at `t`:
+    /// the speed over the last [`VELOCITY_WINDOW_MS`], weighted toward the
+    /// end; none if the fingers rested [`REST_MS`] first or it is too slow.
+    fn fling_at(&self, t: f64) -> Option<Fling> {
+        let last = self.track.last()?;
+        if t - last.0 > REST_MS {
+            return None;
+        }
+        let (mut dx, mut dy, mut dt, mut dz, mut dtz) = (0.0, 0.0, 0.0, 0.0, 0.0);
+        for w in self.track.windows(2) {
+            let (a, b) = (&w[0], &w[1]);
+            let span = b.0 - a.0;
+            let age = last.0 - b.0;
+            if span <= 0.0 || age > VELOCITY_WINDOW_MS {
+                continue;
+            }
+            let weight = 1.0 - age / (VELOCITY_WINDOW_MS * 1.25);
+            dx += weight * (b.1 .0 - a.1 .0);
+            dy += weight * (b.1 .1 - a.1 .1);
+            dt += weight * span;
+            if let (Some(s0), Some(s1)) = (a.2, b.2) {
+                if s0 > 1.0 && s1 > 1.0 {
+                    dz += weight * (s1 / s0).ln();
+                    dtz += weight * span;
+                }
+            }
+        }
+        if dt <= 0.0 {
+            return None;
+        }
+        let vel = (dx / dt, dy / dt);
+        let zoom_rate = if dtz > 0.0 { dz / dtz } else { 0.0 };
+        let fling = Fling {
+            vel: if vel.0.hypot(vel.1) < MIN_SPEED {
+                (0.0, 0.0)
+            } else {
+                vel
+            },
+            zoom_rate: if zoom_rate.abs() < MIN_ZOOM_RATE {
+                0.0
+            } else {
+                zoom_rate
+            },
+            about: last.1,
+        };
+        (!fling.done()).then_some(fling)
     }
 
     /// A finger lifted at `t` ms: a tap if it was the only touch, quick and
@@ -291,6 +416,8 @@ impl Touches {
         let Some(i) = self.fingers.iter().position(|f| f.id == id) else {
             return Vec::new();
         };
+        let fling = self.fling_at(t);
+        self.track.clear();
         let f = self.fingers.remove(i);
         let tap = self.fingers.is_empty() && !self.moved && !self.long_fired && t - f.t0 < TAP_MS;
         if self.fingers.is_empty() {
@@ -300,12 +427,13 @@ impl Touches {
         if tap {
             vec![TouchAction::Tap(f.at)]
         } else {
-            Vec::new()
+            fling.map(TouchAction::Fling).into_iter().collect()
         }
     }
 
     /// All touches were cancelled.
     pub fn cancel(&mut self) {
+        self.track.clear();
         self.fingers.clear();
         self.moved = false;
         self.long_fired = false;
@@ -454,14 +582,20 @@ mod tests {
     fn a_quick_still_touch_is_a_tap_and_a_drag_is_not() {
         let mut t = Touches::default();
         t.down(1, (50.0, 60.0), 0.0);
-        assert!(t.moved(1, (53.0, 62.0)).is_empty(), "within the slop");
+        assert!(t.moved(1, (53.0, 62.0), 20.0).is_empty(), "within the slop");
         assert_eq!(t.up(1, 120.0), [TouchAction::Tap((53.0, 62.0))]);
         assert!(!t.active());
         // Past the slop it pans (from the start), then by each step; no tap.
         t.down(1, (50.0, 60.0), 0.0);
-        assert_eq!(t.moved(1, (70.0, 60.0)), [TouchAction::Pan((20.0, 0.0))]);
-        assert_eq!(t.moved(1, (75.0, 64.0)), [TouchAction::Pan((5.0, 4.0))]);
-        assert!(t.up(1, 100.0).is_empty());
+        assert_eq!(
+            t.moved(1, (70.0, 60.0), 30.0),
+            [TouchAction::Pan((20.0, 0.0))]
+        );
+        assert_eq!(
+            t.moved(1, (75.0, 64.0), 40.0),
+            [TouchAction::Pan((5.0, 4.0))]
+        );
+        assert!(t.up(1, 130.0).is_empty());
         // Too slow is not a tap.
         t.down(1, (0.0, 0.0), 0.0);
         assert!(t.up(1, 900.0).is_empty());
@@ -473,7 +607,7 @@ mod tests {
         t.down(1, (100.0, 100.0), 0.0);
         t.down(2, (200.0, 100.0), 10.0);
         // Spread from 100 to 150 about the new centre; the centre moved 25.
-        let a = t.moved(2, (250.0, 100.0));
+        let a = t.moved(2, (250.0, 100.0), 30.0);
         assert_eq!(a[0], TouchAction::Pan((25.0, 0.0)));
         assert_eq!(
             a[1],
@@ -502,9 +636,146 @@ mod tests {
         assert!(t.up(1, 2000.0).is_empty());
         // Moving cancels the press.
         t.down(1, (10.0, 20.0), 0.0);
-        t.moved(1, (60.0, 20.0));
+        t.moved(1, (60.0, 20.0), 10.0);
         assert!(t.poll(900.0).is_empty());
         t.cancel();
         assert!(!t.active());
+    }
+
+    /// A drag of `v` px/ms sampled every 10 ms for `n` samples from `t0`.
+    fn drag(t: &mut Touches, v: f64, t0: f64, n: usize) -> f64 {
+        t.down(1, (100.0, 100.0), t0);
+        let mut now = t0;
+        for k in 1..=n {
+            now = t0 + 10.0 * k as f64;
+            t.moved(1, (100.0 + v * 10.0 * k as f64, 100.0), now);
+        }
+        now
+    }
+
+    #[test]
+    fn the_release_speed_is_read_from_the_last_moves() {
+        let mut t = Touches::default();
+        let end = drag(&mut t, 1.5, 0.0, 12);
+        let up = t.up(1, end + 8.0);
+        let [TouchAction::Fling(f)] = up[..] else {
+            panic!("{up:?}")
+        };
+        assert!(
+            (f.vel.0 - 1.5).abs() < 1e-9 && f.vel.1.abs() < 1e-9,
+            "{f:?}"
+        );
+        assert_eq!(f.zoom_rate, 0.0);
+        // A drag that sped up leaves the later, faster speed (the window
+        // is the last 100 ms and weighted to the end).
+        let mut t = Touches::default();
+        t.down(1, (0.0, 0.0), 0.0);
+        let mut x = 0.0;
+        for k in 1..=20 {
+            x += if k <= 10 { 0.2 } else { 2.0 } * 10.0;
+            t.moved(1, (x, 0.0), 10.0 * k as f64);
+        }
+        let [TouchAction::Fling(f)] = t.up(1, 205.0)[..] else {
+            panic!()
+        };
+        assert!(f.vel.0 > 1.6 && f.vel.0 < 2.0, "{f:?}");
+    }
+
+    #[test]
+    fn a_rested_finger_or_a_tap_or_a_slow_drag_leaves_no_momentum() {
+        let mut t = Touches::default();
+        let end = drag(&mut t, 1.5, 0.0, 10);
+        assert!(t.up(1, end + 80.0).is_empty(), "rested before lifting");
+        let mut t = Touches::default();
+        let end = drag(&mut t, 0.01, 0.0, 10);
+        // (Not even past the slop: a tap, and no fling.)
+        assert!(!t
+            .up(1, end + 5.0)
+            .iter()
+            .any(|a| matches!(a, TouchAction::Fling(_))));
+        let mut t = Touches::default();
+        t.down(1, (5.0, 5.0), 0.0);
+        assert!(matches!(t.up(1, 50.0)[..], [TouchAction::Tap(_)]));
+    }
+
+    #[test]
+    fn a_pinch_leaves_a_zoom_rate() {
+        let mut t = Touches::default();
+        t.down(1, (100.0, 100.0), 0.0);
+        t.down(2, (200.0, 100.0), 0.0);
+        let mut d = 100.0;
+        for k in 1..=10 {
+            d *= 1.02;
+            t.moved(2, (100.0 + d, 100.0), 10.0 * k as f64);
+        }
+        let up = t.up(2, 105.0);
+        let Some(TouchAction::Fling(f)) = up.last().copied() else {
+            panic!("{up:?}")
+        };
+        assert!((f.zoom_rate - 1.02f64.ln() / 10.0).abs() < 1e-6, "{f:?}");
+        assert!(f.zoom_rate > 0.0);
+    }
+
+    #[test]
+    fn a_fling_decays_like_scroll_deceleration_and_stops() {
+        let mut f = Fling {
+            vel: (2.0, -1.0),
+            zoom_rate: 0.0,
+            about: (0.0, 0.0),
+        };
+        // Frames of 16 ms add up to v * tau, tau = -1 / ln 0.998 (about 500 ms).
+        let tau = -1.0 / PAN_DECAY.ln();
+        let (mut x, mut y, mut frames) = (0.0, 0.0, 0);
+        while !f.done() {
+            let (p, z) = f.step(16.0);
+            assert_eq!(z, 1.0);
+            x += p.0;
+            y += p.1;
+            frames += 1;
+            assert!(frames < 2000, "never stops");
+        }
+        // It stops at the floor, a little short of the whole distance.
+        let (whole_x, whole_y) = (2.0 * tau, -tau);
+        assert!(x < whole_x && x > 0.97 * whole_x, "{x} of {whole_x}");
+        assert!(y > whole_y && y < 0.97 * whole_y);
+        // The speed after t ms is v * 0.998^t, however the frames fall.
+        let mut a = Fling {
+            vel: (1.0, 0.0),
+            zoom_rate: 0.0,
+            about: (0.0, 0.0),
+        };
+        let mut b = a;
+        a.step(100.0);
+        for _ in 0..10 {
+            b.step(10.0);
+        }
+        assert!((a.vel.0 - 0.998f64.powf(100.0)).abs() < 1e-12);
+        assert!((a.vel.0 - b.vel.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn a_zoom_fling_is_short_and_reduced_motion_has_none() {
+        let mut f = Fling {
+            vel: (0.0, 0.0),
+            zoom_rate: 0.002,
+            about: (50.0, 50.0),
+        };
+        let mut total = 1.0;
+        let mut frames = 0;
+        while !f.done() {
+            total *= f.step(16.0).1;
+            frames += 1;
+            assert!(frames < 200);
+        }
+        // About rate * tau (100 ms): a few percent, under half a second.
+        assert!(total > 1.1 && total < 1.25, "{total}");
+        assert!(frames * 16 < 700);
+        let g = Fling {
+            vel: (1.0, 0.0),
+            zoom_rate: 0.0,
+            about: (0.0, 0.0),
+        };
+        assert_eq!(g.for_motion(true), None);
+        assert_eq!(g.for_motion(false), Some(g));
     }
 }

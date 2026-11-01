@@ -4,7 +4,7 @@
 //! the [`Shell`] holds the inspector's, and the signals here only mirror what
 //! the chrome shows of it.
 
-use crate::gesture::{self, Gesture, TouchAction, Touches, Wheel, WheelMode};
+use crate::gesture::{self, Fling, Gesture, TouchAction, Touches, Wheel, WheelMode};
 use crate::shell::{FilterRow, LayerRow, Shell};
 use crate::stats::FrameStats;
 use leptos::prelude::*;
@@ -20,15 +20,17 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 type Handle = Rc<RefCell<Option<Shell>>>;
-/// The fingers on the panes, and the pane the gesture began on.
-type Fingers = Rc<RefCell<(Touches, Pane)>>;
+/// The fingers on the panes, the pane the gesture began on, and the momentum
+/// still running from the last one (with the frame time it was last stepped).
+type Fingers = Rc<RefCell<(Touches, Pane, Option<(Fling, f64)>)>>;
 
 /// The About text (shared with the static fallback page, which fetches the
 /// same file). Wording approved by the user, 2026-11-01.
 const ABOUT: &str = include_str!("../about.html");
 
 /// The page's layout: `?layout=mobile|desktop` decides; else a phone-sized
-/// touch device (coarse pointer, narrow) gets the mobile one.
+/// touch device (coarse pointer, narrow, or short: a phone turned on its
+/// side) gets the mobile one.
 fn layout_choice() -> Layout {
     match query("layout").as_deref() {
         Some("mobile") => return Layout::Mobile,
@@ -36,7 +38,9 @@ fn layout_choice() -> Layout {
         _ => {}
     }
     let phone = window()
-        .match_media("(pointer: coarse) and (max-width: 820px)")
+        .match_media(
+            "(pointer: coarse) and (max-width: 820px), (pointer: coarse) and (max-height: 520px)",
+        )
         .ok()
         .flatten()
         .is_some_and(|m| m.matches());
@@ -45,6 +49,15 @@ fn layout_choice() -> Layout {
     } else {
         Layout::Desktop
     }
+}
+
+/// Whether the user asks for reduced motion: no momentum after a drag.
+fn reduced_motion() -> bool {
+    window()
+        .match_media("(prefers-reduced-motion: reduce)")
+        .ok()
+        .flatten()
+        .is_some_and(|m| m.matches())
 }
 
 /// Go to the static page, saying why.
@@ -126,6 +139,7 @@ fn PaneCanvas(
             if ev.pointer_type() == "touch" {
                 let mut f = fingers.borrow_mut();
                 f.1 = pane;
+                f.2 = None;
                 f.0.down(
                     ev.pointer_id(),
                     (ev.offset_x() as f64, ev.offset_y() as f64),
@@ -144,8 +158,15 @@ fn PaneCanvas(
             if ev.pointer_type() == "touch" {
                 let acts = fingers.borrow_mut().0.up(ev.pointer_id(), ev.time_stamp());
                 for a in acts {
-                    if let (TouchAction::Tap(at), Some(s)) = (a, handle.borrow_mut().as_mut()) {
-                        s.touch(pane, (at.0 * s.dpr(), at.1 * s.dpr()), false);
+                    match (a, handle.borrow_mut().as_mut()) {
+                        (TouchAction::Tap(at), Some(s)) => {
+                            s.touch(pane, (at.0 * s.dpr(), at.1 * s.dpr()), false);
+                        }
+                        (TouchAction::Fling(f), _) => {
+                            fingers.borrow_mut().2 =
+                                f.for_motion(reduced_motion()).map(|f| (f, 0.0));
+                        }
+                        _ => {}
                     }
                 }
                 return;
@@ -164,7 +185,14 @@ fn PaneCanvas(
         move |ev: web_sys::PointerEvent| {
             if ev.pointer_type() == "touch" {
                 let at = (ev.offset_x() as f64, ev.offset_y() as f64);
-                let acts = fingers.borrow_mut().0.moved(ev.pointer_id(), at);
+                let acts = {
+                    let mut f = fingers.borrow_mut();
+                    let acts = f.0.moved(ev.pointer_id(), at, ev.time_stamp());
+                    if !acts.is_empty() {
+                        f.2 = None;
+                    }
+                    acts
+                };
                 if let Some(s) = handle.borrow_mut().as_mut() {
                     let k = s.dpr();
                     for a in acts {
@@ -422,13 +450,14 @@ pub fn App() -> impl IntoView {
     let mode = RwSignal::new(Mode::SideBySide);
     let layout = RwSignal::new(layout_choice());
     let wipe = RwSignal::new(0.5f64);
+    let stacked = RwSignal::new(false);
     let sheet = RwSignal::new(Sheet::Closed);
     let menu_open = RwSignal::new(false);
     let about_open = RwSignal::new(false);
     let nav_on = RwSignal::new(layout.get_untracked() == Layout::Desktop);
     let summary = RwSignal::new(String::new());
     let title = RwSignal::new(String::new());
-    let fingers: Fingers = Rc::new(RefCell::new((Touches::default(), Pane::Redraw)));
+    let fingers: Fingers = Rc::new(RefCell::new((Touches::default(), Pane::Redraw, None)));
     let grip_from = Rc::new(Cell::new(0.0f64));
     let wipe_drag = Rc::new(Cell::new(false));
     // The look follows the system until the switch is used.
@@ -532,7 +561,7 @@ pub fn App() -> impl IntoView {
                             Some("scan") => Some(Mode::ScanOnly),
                             Some("overlay") => Some(Mode::Overlay),
                             Some("wipe") => Some(Mode::Wipe),
-                            Some("side") => Some(Mode::SideBySide),
+                            Some("side" | "compare") => Some(Mode::SideBySide),
                             _ => None,
                         };
                         if let (Some(m), Some(s)) = (start, handle.borrow_mut().as_mut()) {
@@ -700,8 +729,44 @@ pub fn App() -> impl IntoView {
                 if sheet.get_untracked() != m.sheet() {
                     sheet.set(m.sheet());
                 }
+                if stacked.get_untracked() != m.stacked() {
+                    stacked.set(m.stacked());
+                }
                 if wipe.get_untracked() != m.wipe() {
                     wipe.set(m.wipe());
+                }
+                // Momentum after a touch drag or pinch: the same Pan and Zoom
+                // messages, so both locked panes follow, until it dies away.
+                {
+                    let mut f = fingers.borrow_mut();
+                    let pane = f.1;
+                    if let Some((fling, last)) = f.2.as_mut() {
+                        let dt = if *last == 0.0 {
+                            16.0
+                        } else {
+                            (t - *last).clamp(1.0, 50.0)
+                        };
+                        *last = t;
+                        let (pan, zoom) = fling.step(dt);
+                        let k = s.dpr();
+                        if pan != (0.0, 0.0) {
+                            s.send(Msg::Pan {
+                                pane,
+                                by: (pan.0 * k, pan.1 * k),
+                            });
+                        }
+                        if zoom != 1.0 {
+                            let about = (fling.about.0 * k, fling.about.1 * k);
+                            s.send(Msg::Zoom {
+                                pane,
+                                factor: zoom,
+                                about,
+                            });
+                        }
+                        if fling.done() {
+                            f.2 = None;
+                        }
+                    }
                 }
                 // A finger held still on the paper is a long press.
                 let held = fingers.borrow_mut().0.poll(t);
@@ -773,6 +838,7 @@ pub fn App() -> impl IntoView {
             }
         }
     };
+    let (m1, m2) = (set_mode.clone(), set_mode.clone());
     let (b1, b2, b3, b4, b5) = (
         set_mode.clone(),
         set_mode.clone(),
@@ -944,13 +1010,16 @@ pub fn App() -> impl IntoView {
 
     view! {
         <div class="shell" data-layout=move || if layout.get() == Layout::Mobile { "mobile" } else { "desktop" }
-            data-mode=move || format!("{:?}", mode.get())>
+            data-mode=move || format!("{:?}", mode.get())
+            data-split=move || if stacked.get() { "stacked" } else { "abreast" }>
             <div class="bar">
                 <span class="doc-title"><b>{move || title.get()}</b></span>
                 <span class="spacer"></span>
                 <div class="group modes">
                     <button id="mode-side" class:on=move || mode.get() == Mode::SideBySide
-                        on:click=move |_| b1(Mode::SideBySide)>"Side by side"</button>
+                        on:click=move |_| b1(Mode::SideBySide)>
+                        {move || if layout.get() == Layout::Mobile { "Compare" } else { "Side by side" }}
+                    </button>
                     <button id="mode-redraw" class:on=move || mode.get() == Mode::RedrawOnly
                         on:click=move |_| b2(Mode::RedrawOnly)>"Redraw"</button>
                     <button id="mode-scan" class:on=move || mode.get() == Mode::ScanOnly
@@ -981,7 +1050,8 @@ pub fn App() -> impl IntoView {
                     on:click=open_menu>"Menu"</button>
             </div>
             <div class="stage" node_ref=stage_ref>
-                <div class="panes" class:wipe=move || mode.get() == Mode::Wipe>
+                <div class="panes" class:wipe=move || mode.get() == Mode::Wipe
+                    class:stacked=move || stacked.get()>
                     <PaneCanvas pane=Pane::Redraw handle=handle.clone() node_ref=redraw_ref wheel_mode=wheel_mode fingers=fingers.clone() />
                     <PaneCanvas pane=Pane::Scan handle=handle.clone() node_ref=scan_ref wheel_mode=wheel_mode fingers=fingers.clone() />
                 </div>
@@ -1040,6 +1110,12 @@ pub fn App() -> impl IntoView {
                 <div class="mobile-only menu-actions">
                     <button id="theme-m" on:click=toggle_theme>{move || theme.get().label()}</button>
                     <button id="about-m" on:click=open_about>"About"</button>
+                </div>
+                <div class="mobile-only menu-actions" id="menu-views">
+                    <button id="m-redraw" class:on=move || mode.get() == Mode::RedrawOnly
+                        on:click=move |_| { m1(Mode::RedrawOnly); send_filter.with_value(|f| f(Msg::SetMenu(false))); }>"Redraw only"</button>
+                    <button id="m-scan" class:on=move || mode.get() == Mode::ScanOnly
+                        on:click=move |_| { m2(Mode::ScanOnly); send_filter.with_value(|f| f(Msg::SetMenu(false))); }>"Scan only"</button>
                 </div>
                 <h2>"Layers"</h2>
                 <div id="layers">

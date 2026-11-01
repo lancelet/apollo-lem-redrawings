@@ -49,7 +49,9 @@ pub struct NodeId(pub u32);
 /// Which panes are shown.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Mode {
-    /// Redraw on the left, scan on the right.
+    /// The redraw and the scan together, both locked through the chain: the
+    /// redraw left and the scan right, or (the mobile layout in a portrait
+    /// window, see [`Model::stacked`]) the redraw above and the scan below.
     SideBySide,
     /// The redraw alone.
     RedrawOnly,
@@ -225,9 +227,10 @@ pub enum Msg {
     /// Show the icons of dimensions' own constraints (off by default: the
     /// dimension is drawn).
     SetDimensionConstraints(bool),
-    /// Choose the layout. The mobile one has no side by side (it becomes
-    /// the redraw alone) and no navigator; the desktop one has no wipe (it
-    /// becomes side by side) and has the navigator. The view is kept.
+    /// Choose the layout. The mobile one starts as the compare view (both
+    /// panes, stacked or side by side by the window's shape) and has no
+    /// navigator; the desktop one has no wipe (it becomes side by side) and
+    /// has the navigator. The view is kept.
     SetLayout(Layout),
     /// Where the wipe's divider is, as a fraction of the width (0.02 to
     /// 0.98): the redraw is left of it, the scan right of it.
@@ -481,14 +484,29 @@ impl Model {
             } else {
                 Pane::Scan
             }),
-            Mode::SideBySide => Some(if px.0 < (self.window.0 / 2) as f64 {
-                Pane::Redraw
-            } else {
-                Pane::Scan
-            }),
+            Mode::SideBySide => {
+                let (at, half) = if self.stacked() {
+                    (px.1, self.window.1 / 2)
+                } else {
+                    (px.0, self.window.0 / 2)
+                };
+                Some(if at < half as f64 {
+                    Pane::Redraw
+                } else {
+                    Pane::Scan
+                })
+            }
             Mode::RedrawOnly => Some(Pane::Redraw),
             Mode::ScanOnly | Mode::Overlay => Some(Pane::Scan),
         }
+    }
+
+    /// Whether the two panes of [`Mode::SideBySide`] are stacked, the redraw
+    /// above the scan: on the mobile layout in a window taller than wide.
+    /// Derived from the window, so a rotation (a `Resize`) turns it round
+    /// while the view's centre and scale stay.
+    pub fn stacked(&self) -> bool {
+        self.layout == Layout::Mobile && self.window.1 > self.window.0
     }
 
     /// How far up the bottom sheet is.
@@ -592,6 +610,8 @@ impl Model {
     pub fn pane_size(&self, pane: Pane) -> Option<(u32, u32)> {
         let (w, h) = self.window;
         match (self.mode, pane) {
+            (Mode::SideBySide, Pane::Redraw) if self.stacked() => Some((w, h / 2)),
+            (Mode::SideBySide, Pane::Scan) if self.stacked() => Some((w, h - h / 2)),
             (Mode::SideBySide, Pane::Redraw) => Some((w / 2, h)),
             (Mode::SideBySide, Pane::Scan) => Some((w - w / 2, h)),
             (Mode::RedrawOnly, Pane::Redraw) | (Mode::ScanOnly | Mode::Overlay, Pane::Scan) => {
@@ -607,6 +627,7 @@ impl Model {
     pub fn pane_origin(&self, pane: Pane) -> Option<(u32, u32)> {
         self.pane_size(pane)?;
         Some(match (self.mode, pane) {
+            (Mode::SideBySide, Pane::Scan) if self.stacked() => (0, self.window.1 / 2),
             (Mode::SideBySide, Pane::Scan) => (self.window.0 / 2, 0),
             _ => (0, 0),
         })
@@ -737,10 +758,8 @@ pub fn update(m: &mut Model, msg: Msg) {
     match msg {
         Msg::Resize { width, height } => m.window = (width.max(1), height.max(1)),
         Msg::SetMode(mode) => {
-            // The layouts' own modes: no side by side on a phone, no wipe
-            // beside the panels.
+            // The wipe is the phone's; beside the panels it is side by side.
             m.mode = match (m.layout, mode) {
-                (Layout::Mobile, Mode::SideBySide) => Mode::RedrawOnly,
                 (Layout::Desktop, Mode::Wipe) => Mode::SideBySide,
                 (_, mode) => mode,
             };
