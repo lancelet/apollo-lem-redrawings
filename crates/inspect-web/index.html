@@ -38,9 +38,29 @@
       }
       el("boot-bytes").textContent = total ? mb(got) + " of " + mb(total) + " MB" : mb(got) + " MB";
     };
-    var failed = function (why) {
-      location.replace("fallback.html?reason=" + encodeURIComponent("The viewer could not be loaded: " + why));
+    // Say as much as helps a diagnosis: the step, the error's name, message
+    // and first stack lines, the file, and the browser.
+    var failed = function (step, e, file) {
+      var lines = ["The viewer could not be loaded.", "Step: " + step];
+      if (e && typeof e === "object") {
+        lines.push("Error: " + (e.name || "Error") + ": " + (e.message || String(e)));
+        if (e.stack) lines.push("Stack: " + String(e.stack).split("\n").slice(0, 4).join(" | "));
+      } else if (e != null) {
+        lines.push("Error: " + e);
+      }
+      if (file) lines.push("File: " + file);
+      lines.push("Browser: " + navigator.userAgent);
+      location.replace("fallback.html?reason=" + encodeURIComponent(lines.join("\n").slice(0, 1800)));
     };
+    // Anything thrown while the viewer starts (the loading indicator is still
+    // up), such as the wasm failing to compile, goes to the static page too.
+    var starting = function () { return !!document.getElementById("boot"); };
+    window.addEventListener("error", function (ev) {
+      if (starting()) failed("starting the viewer", ev.error || ev.message, ev.filename);
+    });
+    window.addEventListener("unhandledrejection", function (ev) {
+      if (starting()) failed("starting the viewer", ev.reason);
+    });
     // Bound: WebKit refuses a fetch called on anything but the window (the
     // wasm loader calls it bare, from a module, where `this` is undefined).
     var plain = window.fetch.bind(window);
@@ -49,7 +69,7 @@
       var result = plain.apply(null, arguments);
       if (!/\.wasm([?#]|$)/.test(url)) return result;
       return result.then(function (r) {
-        if (!r.ok) { failed("HTTP " + r.status); return r; }
+        if (!r.ok) { failed("fetching the viewer", "HTTP " + r.status, url); return r; }
         // The loader gets the response untouched; a clone is read to count
         // the bytes. (A response rebuilt around a counting stream kept the
         // compressed Content-Length over the decoded body, which WebKit
@@ -72,7 +92,7 @@
           step();
         } catch (e) {}
         return r;
-      }, function (e) { failed("fetching the viewer: " + e); throw e; });
+      }, function (e) { failed("fetching the viewer", e, url); throw e; });
     };
   })();
 </script>
