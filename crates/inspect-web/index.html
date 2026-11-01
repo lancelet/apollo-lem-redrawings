@@ -41,10 +41,12 @@
     var failed = function (why) {
       location.replace("fallback.html?reason=" + encodeURIComponent("The viewer could not be loaded: " + why));
     };
-    var plain = window.fetch;
+    // Bound: WebKit refuses a fetch called on anything but the window (the
+    // wasm loader calls it bare, from a module, where `this` is undefined).
+    var plain = window.fetch.bind(window);
     window.fetch = function (input) {
       var url = typeof input === "string" ? input : (input && input.url) || String(input);
-      var result = plain.apply(this, arguments);
+      var result = plain.apply(null, arguments);
       if (!/\.wasm([?#]|$)/.test(url)) return result;
       return result.then(function (r) {
         if (!r.ok) { failed("HTTP " + r.status); return r; }
