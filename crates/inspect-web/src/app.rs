@@ -67,7 +67,9 @@ fn with_build(e: &str) -> String {
         .ok()
         .and_then(|b| b.as_string())
         .unwrap_or_else(|| "unknown".into());
-    format!("{e} (build {build})")
+    let e = format!("{e} (build {build})");
+    web_sys::console::error_1(&e.as_str().into());
+    e
 }
 
 /// Take down the loading indicator (index.html's `#boot`), once the sheet is
@@ -83,6 +85,11 @@ fn remove_boot() {
 
 /// Go to the static page, saying why.
 fn to_fallback(reason: &str) {
+    // Under ?debug the page stays, and the log shows the reason.
+    web_sys::console::error_1(&reason.into());
+    if query("debug").is_some() {
+        return;
+    }
     let enc: String = js_sys::encode_uri_component(reason).into();
     let _ = window()
         .location()

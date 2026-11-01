@@ -14,6 +14,35 @@
   }
 </script>
 <script>
+  // ?debug: every console message and error, with the time since load and
+  // the build, in a panel over the page (for a phone, where there is no
+  // console to read). Added first, so it sees everything after it.
+  if (/[?&]debug\b/.test(location.search)) (function () {
+    var t0 = performance.now(), lines = [], pre = null;
+    var put = function (kind, args) {
+      var text = Array.prototype.map.call(args, function (a) {
+        if (a && a.stack) return (a.name || "Error") + ": " + a.message + " | " + String(a.stack).split("\n").slice(0, 3).join(" | ");
+        if (a && typeof a === "object") { try { return JSON.stringify(a); } catch (e) { return String(a); } }
+        return String(a);
+      }).join(" ");
+      lines.push(((performance.now() - t0) / 1000).toFixed(2) + "s " + kind + ": " + text);
+      if (!pre && document.body) {
+        pre = document.createElement("pre");
+        pre.style.cssText = "position:fixed;left:0;right:0;bottom:0;max-height:60%;overflow:auto;z-index:1000;margin:0;padding:8px;font:11px/1.35 monospace;white-space:pre-wrap;word-break:break-all;background:rgba(0,0,0,.85);color:#fff;";
+        document.body.appendChild(pre);
+      }
+      if (pre) pre.textContent = "build " + (window.LMS_BUILD || "?") + " | " + navigator.userAgent + "\n" + lines.join("\n");
+    };
+    ["log", "info", "warn", "error", "debug"].forEach(function (k) {
+      var f = console[k];
+      console[k] = function () { put(k, arguments); return f.apply(console, arguments); };
+    });
+    window.addEventListener("error", function (ev) { put("error event", [ev.error || ev.message, ev.filename + ":" + ev.lineno]); }, true);
+    window.addEventListener("unhandledrejection", function (ev) { put("unhandled rejection", [ev.reason]); });
+    document.addEventListener("DOMContentLoaded", function () { put("info", ["page loaded"]); });
+  })();
+</script>
+<script>
   // The indicator in <body> (#boot): the viewer's download with its bytes, then
   // the sheet's loading; the viewer removes it when the first frame is drawn.
   // The .wasm is the bulk of a first visit, so its response body is counted as
@@ -21,10 +50,10 @@
   // a compressed body's is the compressed length, so then site.sh's WASM_BYTES
   // (the file's size) stands in, or only the bytes received are shown.
   (function () {
-    var WASM_BYTES = 2570452; // the wasm file's size, set by site.sh
+    var WASM_BYTES = 2570638; // the wasm file's size, set by site.sh
     // The build (the commit and the day it was built), set by site.sh; every
     // failure message carries it, so a report names the version that failed.
-    window.LMS_BUILD = "3e66563, 2026-11-01";
+    window.LMS_BUILD = "4c86112, 2026-11-01";
     var el = function (id) { return document.getElementById(id); };
     var show = function (phase, got, total) {
       var phaseEl = el("boot-phase");
@@ -54,6 +83,7 @@
       if (file) lines.push("File: " + file);
       lines.push("Browser: " + navigator.userAgent);
       lines.push("Build: " + window.LMS_BUILD);
+      if (/[?&]debug\b/.test(location.search)) { console.error(lines.join(" / ")); return; }
       location.replace("fallback.html?reason=" + encodeURIComponent(lines.join("\n").slice(0, 1800)));
     };
     // Anything thrown while the viewer starts (the loading indicator is still
@@ -105,7 +135,7 @@
 
 
 
-<script type="module" nonce="wB3p7Z6kn8ZoDD93ffTIOw==">
+<script type="module" nonce="LOtVawkLgvmPGWDSF5l6xA==">
 import init, * as bindings from './lmsheets-inspect-web.js';
 const wasm = await init({ module_or_path: './lmsheets-inspect-web_bg.wasm' });
 
@@ -116,7 +146,7 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-<link rel="modulepreload" href="./lmsheets-inspect-web.js" crossorigin=anonymous integrity="sha384-i90osjXE3y25nxMwdw3C3efCsceULaEgP3Cix9UzCViBSHb3I5ezvn7fld1Dr1AS"><link rel="preload" href="./lmsheets-inspect-web_bg.wasm" crossorigin=anonymous integrity="sha384-/LFiwJx3IXjxAqBu8UkfjXtpmxV50cFwrpDoM9swvzX6dLjVlD/g9uJqJepBPhe6" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="./lmsheets-inspect-web.js" crossorigin=anonymous integrity="sha384-3H1dgj/4kykiCVZJ+I8PrgoxtLYrHiJhog2nub3Meu/4J63AiyryOprlyiCE0VPg"><link rel="preload" href="./lmsheets-inspect-web_bg.wasm" crossorigin=anonymous integrity="sha384-LDmoFCnZX2MUmzlBkz+C/8SaT7Pm5QUbP3a9WsA9v0HolPIjuOgKzL6NRI0gAIUM" as="fetch" type="application/wasm"></head>
 <body>
 <div id="boot" role="status">
   <div class="box">
