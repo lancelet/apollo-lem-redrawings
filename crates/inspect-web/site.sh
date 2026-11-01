@@ -78,6 +78,9 @@ if [ -z "$COMMIT" ] && git -C "$ROOT" rev-parse --short HEAD >/dev/null 2>&1; th
   [ -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)" ] || COMMIT="$COMMIT (with uncommitted changes)"
 fi
 sed -e "s|@COMMIT@|${COMMIT:-unknown}|" -e "s|@DATE@|$(date -u +%Y-%m-%d)|" "$HERE/site-readme.md" > "$OUT/README.md"
+# The build in the page, for failure reports.
+sed -i.bak "s|window.LMS_BUILD = \"local\";|window.LMS_BUILD = \"${COMMIT:-unknown}, $(date -u +%Y-%m-%d)\";|" "$OUT/index.html"
+rm "$OUT/index.html.bak"
 
 echo "site: $OUT ($(du -sh "$OUT" | cut -f1), $(find "$OUT" -type f | wc -l | tr -d ' ') files)"
 

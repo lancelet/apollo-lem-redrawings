@@ -60,6 +60,16 @@ fn reduced_motion() -> bool {
         .is_some_and(|m| m.matches())
 }
 
+/// A failure message with the build it happened in (index.html's
+/// `LMS_BUILD`, set by site.sh), so a report names the version.
+fn with_build(e: &str) -> String {
+    let build = js_sys::Reflect::get(&window(), &"LMS_BUILD".into())
+        .ok()
+        .and_then(|b| b.as_string())
+        .unwrap_or_else(|| "unknown".into());
+    format!("{e} (build {build})")
+}
+
 /// Take down the loading indicator (index.html's `#boot`), once the sheet is
 /// drawn or the viewer has failed and says why.
 fn remove_boot() {
@@ -608,7 +618,7 @@ pub fn App() -> impl IntoView {
                         if e.starts_with("WebGPU") {
                             to_fallback(&e);
                         }
-                        fail.set(e);
+                        fail.set(with_build(&e));
                         remove_boot();
                     }
                 }
@@ -713,7 +723,7 @@ pub fn App() -> impl IntoView {
                     }
                     Ok(None) => {}
                     Err(e) => {
-                        fail.set(e);
+                        fail.set(with_build(&e));
                         remove_boot();
                     }
                 }

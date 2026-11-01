@@ -14,13 +14,12 @@ use web_sys::{
 };
 
 fn js(e: JsValue) -> String {
-    e.as_string()
-        .or_else(|| {
-            js_sys::Reflect::get(&e, &"message".into())
-                .ok()?
-                .as_string()
-        })
-        .unwrap_or_else(|| format!("{e:?}"))
+    let field = |k: &str| js_sys::Reflect::get(&e, &k.into()).ok()?.as_string();
+    match (field("name"), field("message")) {
+        (Some(name), Some(message)) => format!("{name}: {message}"),
+        (None, Some(message)) => message,
+        _ => e.as_string().unwrap_or_else(|| format!("{e:?}")),
+    }
 }
 
 async fn response(url: &str) -> Result<Response, String> {
@@ -42,7 +41,7 @@ pub async fn bytes(url: &str) -> Result<Vec<u8>, String> {
     let r = response(url).await?;
     let buf = JsFuture::from(r.array_buffer().map_err(js)?)
         .await
-        .map_err(js)?;
+        .map_err(|e| format!("{url}: reading: {}", js(e)))?;
     Ok(js_sys::Uint8Array::new(&buf).to_vec())
 }
 

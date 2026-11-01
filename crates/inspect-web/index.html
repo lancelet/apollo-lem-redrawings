@@ -22,6 +22,9 @@
   // (the file's size) stands in, or only the bytes received are shown.
   (function () {
     var WASM_BYTES = 0; // the wasm file's size, set by site.sh
+    // The build (the commit and the day it was built), set by site.sh; every
+    // failure message carries it, so a report names the version that failed.
+    window.LMS_BUILD = "local";
     var el = function (id) { return document.getElementById(id); };
     var show = function (phase, got, total) {
       var phaseEl = el("boot-phase");
@@ -50,6 +53,7 @@
       }
       if (file) lines.push("File: " + file);
       lines.push("Browser: " + navigator.userAgent);
+      lines.push("Build: " + window.LMS_BUILD);
       location.replace("fallback.html?reason=" + encodeURIComponent(lines.join("\n").slice(0, 1800)));
     };
     // Anything thrown while the viewer starts (the loading indicator is still

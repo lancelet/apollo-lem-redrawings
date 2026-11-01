@@ -21,7 +21,10 @@
   // a compressed body's is the compressed length, so then site.sh's WASM_BYTES
   // (the file's size) stands in, or only the bytes received are shown.
   (function () {
-    var WASM_BYTES = 2569637; // the wasm file's size, set by site.sh
+    var WASM_BYTES = 2570452; // the wasm file's size, set by site.sh
+    // The build (the commit and the day it was built), set by site.sh; every
+    // failure message carries it, so a report names the version that failed.
+    window.LMS_BUILD = "3e66563, 2026-11-01";
     var el = function (id) { return document.getElementById(id); };
     var show = function (phase, got, total) {
       var phaseEl = el("boot-phase");
@@ -50,6 +53,7 @@
       }
       if (file) lines.push("File: " + file);
       lines.push("Browser: " + navigator.userAgent);
+      lines.push("Build: " + window.LMS_BUILD);
       location.replace("fallback.html?reason=" + encodeURIComponent(lines.join("\n").slice(0, 1800)));
     };
     // Anything thrown while the viewer starts (the loading indicator is still
@@ -101,7 +105,7 @@
 
 
 
-<script type="module" nonce="hgb0d7KpgrZ5Z0DkA9ZjRg==">
+<script type="module" nonce="wB3p7Z6kn8ZoDD93ffTIOw==">
 import init, * as bindings from './lmsheets-inspect-web.js';
 const wasm = await init({ module_or_path: './lmsheets-inspect-web_bg.wasm' });
 
@@ -112,7 +116,7 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-<link rel="modulepreload" href="./lmsheets-inspect-web.js" crossorigin=anonymous integrity="sha384-i90osjXE3y25nxMwdw3C3efCsceULaEgP3Cix9UzCViBSHb3I5ezvn7fld1Dr1AS"><link rel="preload" href="./lmsheets-inspect-web_bg.wasm" crossorigin=anonymous integrity="sha384-dPYzR57S1PMprbpAROwPbrrPjPlvjaNp5SdQLh4/nV2EE/HyLEuouPl5QrQEP7RR" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="./lmsheets-inspect-web.js" crossorigin=anonymous integrity="sha384-i90osjXE3y25nxMwdw3C3efCsceULaEgP3Cix9UzCViBSHb3I5ezvn7fld1Dr1AS"><link rel="preload" href="./lmsheets-inspect-web_bg.wasm" crossorigin=anonymous integrity="sha384-/LFiwJx3IXjxAqBu8UkfjXtpmxV50cFwrpDoM9swvzX6dLjVlD/g9uJqJepBPhe6" as="fetch" type="application/wasm"></head>
 <body>
 <div id="boot" role="status">
   <div class="box">
