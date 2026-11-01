@@ -452,3 +452,8 @@ canvas.pane + canvas.pane { border-left: 1px solid var(--line); }
 .shell[data-layout="mobile"] .group { flex: 1; }
 .shell[data-layout="mobile"] .group button { flex: 1; padding: 8px 4px; }
 .sheet-head { flex: none; touch-action: none; cursor: grab; }
+
+/* A phone's bar holds the mode switch and the menu only; the sheet's title
+   is in the page title and the About panel. */
+.shell[data-layout="mobile"] .doc-title { display: none; }
+.doc-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
